@@ -187,9 +187,9 @@ public class TransportFSM {
     public static double rotHome = .25;
     public static double rotOuttake = .25;
 
-    public static double bucketPitchHome = .8;
-    public static double bucketPitchPrep = .55;
-    public static double bucketPitchScore = .3;
+    public static double bucketPitchHome = 1;
+    public static double bucketPitchPrep = .35;
+    public static double bucketPitchScore = 0;
 
     public static double specClawRollIntake = .15;
     public static double specClawRollOuttake = .86;
@@ -463,37 +463,44 @@ public class TransportFSM {
 //                flapPos = flapClosedrotIntake;
                 break;
             case EMERGENCY_OUTTAKE:
-                outWheelPower = dormant;
+                outWheelPower = intaking;
                 intakePower = outtaking;
-                rotPos = rotOuttake;
+                rotPos = rotIntake;
                 break;
             case OUTTAKE:
                 outWheelPower = outtaking;
+//                if ((sampleWait.seconds() >= longlongTransferWait) && (validSample == 0)) {
+//                    sampleWait.reset();
+//                    sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
+//                }
                 break;
             case RETRACTING:
                 rotPos = rotHome;
-                intakePower = maintaining;
-                specimenTransport = SpecimenTransport.SPECIMEN_HOME;
+                outWheelPower = dormant;
+//                specimenTransport = SpecimenTransport.SPECIMEN_HOME;
+                if (sampleWait.seconds() > emergencyWit) {
+                    intakePower = dormant;
+                    extendoTarget = -5;
+                }
                 break;
             case TRANSFER:
                 rotPos = rotHome;
                 intakePower = transferring;
+                outWheelPower = intaking;
                 extendoTarget = extendoLower;
-                if (sampleWait.seconds() > shortTransferWait) {
-                    if (isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
-                        sampleTransport = SampleTransport.HIGH_BUCKET;
-                    } else if (!isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)){
-                        sampleTransport = SampleTransport.DUMP;
-                    } else {
-                        sampleTransport = SampleTransport.SAMPLE_HOME;
-                    }
-                }
                 break;
             case HIGH_BUCKET:
+                outWheelPower = dormant;
                 extendoTarget = extended;
                 intakePower = dormant;
                 outTarget = outHighBucket;
                 bucketPitchPos = bucketPitchPrep;
+                break;
+            case DUMP:
+                outWheelPower = dormant;
+                extendoTarget = extended;
+                bucketPitchPos = bucketPitchScore;
+//                bucketYawPos = bucketYawSpit;
                 break;
             default:
                 sampleTransport = sampleTransport.SAMPLE_HOME;
@@ -523,16 +530,21 @@ public class TransportFSM {
             case PREP:
                 specArmPos = specArmScore;
                 specRotPos = specClawRollIntake;
+                if (specimenWait.seconds() > specRotWait) {
+                    specimenWait.reset();
+                    specimenTransport = SpecimenTransport.SCORE;
+                }
                 break;
             case SCORE:
                 specRotPos = specClawRollOuttake;
                 break;
             case OPEN:
                 specClawPos = specClawOpen;
-                specArmPos = specArmClear;
                 break;
             case PREP_HOME:
-                specRotPos = specClawRollIntake;
+                specRotPos = specRotPrep;
+                specClawPos = specClawClosed;
+                specArmPos = specArmClear;
                 break;
             case EMERGENCY_PREP:
                 specRotPos = specClawRollIntake;
