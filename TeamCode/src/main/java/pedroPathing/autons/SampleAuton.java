@@ -1,4 +1,4 @@
-package pedroPathing.examples;
+package pedroPathing.autons;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -10,23 +10,13 @@ import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
-/**
- * This is an example auto that showcases movement and control of two servos autonomously.
- * It is a 0+4 (Specimen + Sample) bucket auto. It scores a neutral preload and then pickups 3 samples from the ground and scores them before parking.
- * There are examples of different ways to build paths.
- * A path progression method has been created and can advance based on time, position, or other factors.
- *
- * @author Baron Henderson - 20077 The Indubitables
- * @version 2.0, 11/28/2024
- */
-
-@Autonomous(name = "Example Auto Blue", group = "Examples")
-public class ExampleBucketAuto extends OpMode {
+@Autonomous(name = "Sample Autonomous", group = "Autons")
+public class SampleAuton extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -45,7 +35,7 @@ public class ExampleBucketAuto extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     /** Start Pose of our robot */
-    private final Pose startPose = new Pose(9, 111, Math.toRadians(270));
+    private final Pose startPose = new Pose(144 - 47.375 - 9, 9, Math.toRadians(270));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
     private final Pose scorePose = new Pose(14, 129, Math.toRadians(315));
