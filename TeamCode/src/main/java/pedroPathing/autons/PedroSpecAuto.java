@@ -32,10 +32,10 @@ public class PedroSpecAuto extends OpMode{
     private final double scoreYInc = 1.5;
     private final Point startPoint = new Point(9, 48, Point.CARTESIAN);
     private final Point spec1scorePoint = new Point(scoreX, scoreY, Point.CARTESIAN);
-    private final Point sample1EndPoint = new Point(24.22429906542056, 24.672897196261687, Point.CARTESIAN);
-    private final Point sample1Control1 = new Point(0.22429906542056074,3.5887850467289724, Point.CARTESIAN);
-    private final Point sample1Control2 = new Point(87.25233644859813,57.42056074766356, Point.CARTESIAN);
-    private final Point sample1Control3 = new Point(74.01869158878503,22.429906542056077, Point.CARTESIAN);
+    private final Point sample1_1EndPoint = new Point(48.05600933488915, 34.61376896149358, Point.CARTESIAN);
+    private final Point sample1_1Control = new Point(19.995332555425904,32.09334889148191, Point.CARTESIAN);
+    private final Point sample1_2EndPoint = new Point(24.22429906542056,24.672897196261687, Point.CARTESIAN);
+    private final Point sample1_2Control = new Point(85.5262543757293,29.236872812135353, Point.CARTESIAN);
     private final Point sample2EndPoint = new Point(23.775700934579437,14.803738317757011,Point.CARTESIAN);
     private final Point sample2Control1 = new Point(74.24299065420563,28.26168224299066, Point.CARTESIAN);
     private final Point sample2Control2 = new Point(75.14018691588785,13.233644859813078, Point.CARTESIAN);
@@ -65,9 +65,11 @@ public class PedroSpecAuto extends OpMode{
                 .build();
 
         moveSamples = follower.pathBuilder()
-                .addPath(new BezierCurve(spec1scorePoint, sample1Control1, sample1Control2, sample1Control3, sample1EndPoint))
+                .addPath(new BezierCurve(spec1scorePoint, sample1_1Control, sample1_1EndPoint))
                 .setConstantHeadingInterpolation(heading)
-                .addPath(new BezierCurve(sample1EndPoint, sample2Control1, sample2Control2, sample2EndPoint))
+                .addPath(new BezierCurve(sample1_1EndPoint, sample1_2Control, sample1_2EndPoint))
+                .setConstantHeadingInterpolation(heading)
+                .addPath(new BezierCurve(sample1_2EndPoint, sample2Control1, sample2Control2, sample2EndPoint))
                 .setConstantHeadingInterpolation(heading)
                 .addPath(new BezierCurve(sample2EndPoint,sample3Control1,sample3Control2,sample3Control3,sample3EndPoint))
                 .setConstantHeadingInterpolation(heading)
