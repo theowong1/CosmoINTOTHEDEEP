@@ -30,7 +30,9 @@ public class PedroSpecAuto extends OpMode{
     private final Point startPoint = new Point(9, 48, Point.CARTESIAN);
     private final Point spec1scorePoint = new Point(scoreX, scoreY, Point.CARTESIAN);
     private final Point sample1_1EndPoint = new Point(48.05600933488915, 34.61376896149358, Point.CARTESIAN);
-    private final Point sample1_1Control = new Point(19.995332555425904,32.09334889148191, Point.CARTESIAN);
+    private final Point sample1_1Control1 = new Point(26.91588785046729,69.53271028037383, Point.CARTESIAN);
+    private final Point sample1_1Control2 = new Point(27.14018691588785,28.93457943925233, Point.CARTESIAN);
+
     private final Point sample1_2EndPoint = new Point(24.22429906542056,24.672897196261687, Point.CARTESIAN);
     private final Point sample1_2Control = new Point(85.5262543757293,29.236872812135353, Point.CARTESIAN);
     private final Point sample2EndPoint = new Point(23.775700934579437,14.803738317757011,Point.CARTESIAN);
@@ -61,7 +63,7 @@ public class PedroSpecAuto extends OpMode{
                 .build();
 
         moveFirstSample1 = follower.pathBuilder()
-                .addPath(new BezierCurve(spec1scorePoint, spec1scorePoint, sample1_1Control, sample1_1EndPoint))
+                .addPath(new BezierCurve(spec1scorePoint, spec1scorePoint, sample1_1Control1, sample1_1Control2, sample1_1EndPoint))
                 .setConstantHeadingInterpolation(heading)
                 .build();
 
