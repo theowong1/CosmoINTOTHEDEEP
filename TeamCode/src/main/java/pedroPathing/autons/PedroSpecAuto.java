@@ -24,7 +24,7 @@ public class PedroSpecAuto extends OpMode{
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
     private final double heading = 0;
-    private final double scoreX = 39;
+    private final double scoreX = 37;
     private final double scoreY = 68;
     private final double scoreYInc = 1.5;
     private final Point startPoint = new Point(9, 48, Point.CARTESIAN);
@@ -146,13 +146,13 @@ public class PedroSpecAuto extends OpMode{
                 }
 
                 if(!follower.isBusy()) {
-                    follower.followPath(moveFirstSample1);
+                    follower.followPath(moveFirstSample1, true);
                     setPathState(2);
                 }
                 break;
             case 2:
                 if(!follower.isBusy()) {
-                    follower.followPath(moveFirstSample2);
+                    follower.followPath(moveFirstSample2, true);
                     setPathState(3);
                 }
                 break;
@@ -166,26 +166,26 @@ public class PedroSpecAuto extends OpMode{
                 }
 
                 if(!follower.isBusy()) {
-                    follower.followPath(moveSecondSample);
-                    setPathState(3);
+                    follower.followPath(moveSecondSample,true);
+                    setPathState(4);
                 }
                 break;
             case 4:
                 if(!follower.isBusy()) {
-                    follower.followPath(moveThirdSample);
-                    setPathState(4);
+                    follower.followPath(moveThirdSample,true);
+                    setPathState(5);
                 }
                 break;
             case 5:
                 if(!follower.isBusy()) {
                     follower.followPath(pickupSpec2);
-                    setPathState(5);
+                    setPathState(6);
                 }
                 break;
             case 6:
                 if(!follower.isBusy()) {
                     follower.followPath(scoreSpec2);
-                    setPathState(6);
+                    setPathState(7);
                 }
                 break;
             case 7:
@@ -199,7 +199,7 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(pickupSpec3);
-                    setPathState(7);
+                    setPathState(8);
                 }
                 break;
             case 8:
@@ -213,7 +213,7 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(scoreSpec3);
-                    setPathState(8);
+                    setPathState(9);
                 }
                 break;
             case 9:
@@ -227,7 +227,7 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(pickupSpec4);
-                    setPathState(9);
+                    setPathState(10);
                 }
                 break;
             case 10:
@@ -241,7 +241,7 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(scoreSpec4);
-                    setPathState(10);
+                    setPathState(11);
                 }
                 break;
             case 11:
@@ -255,7 +255,7 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(pickupSpec5);
-                    setPathState(11);
+                    setPathState(12);
                 }
                 break;
             case 12:
@@ -269,7 +269,7 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(scoreSpec5);
-                    setPathState(12);
+                    setPathState(13);
                 }
                 break;
             case 13:
@@ -283,7 +283,7 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(park);
-                    setPathState(13);
+                    setPathState(14);
                 }
                 break;
             case 14:
