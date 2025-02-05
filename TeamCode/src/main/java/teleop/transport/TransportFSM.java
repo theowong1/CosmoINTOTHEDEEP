@@ -187,7 +187,7 @@ public class TransportFSM {
 
     public static double rotIntake = .9;
     public static double rotPrep = .6;
-    public static double rotHome = .25;
+    public static double rotHome = .225;
     public static double rotOuttake = .25;
 
     public static double bucketPitchHome = 1;
@@ -197,7 +197,7 @@ public class TransportFSM {
     public static double specClawRollIntake = .15;
     public static double specClawRollOuttake = .86;
 
-    public static double specClawOpen = .4;
+    public static double specClawOpen = .45;
     public static double specClawClosed = .15;
     public static double specArmHome = .05;
     public static double specRotPrep = .2;
@@ -809,9 +809,12 @@ public class TransportFSM {
                     if (gamepad1.y) {
                         sampleTransport = SampleTransport.DUMP;
                     }
-                    if (gamepad1.x) {
-                        sampleTransport = SampleTransport.SAMPLE_HOME;
+                    if (gamepad1.right_bumper) {
+                        sampleTransport = SampleTransport.EXTENDED;
                     }
+//                    if (gamepad1.x) {
+//                        sampleTransport = SampleTransport.SAMPLE_HOME;
+//                    }
                     break;
                 case DUMP:
                     outWheelPower = dormant;
