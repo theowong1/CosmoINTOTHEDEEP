@@ -97,7 +97,7 @@ public class Drive {
             // but only if at least one is out of the range [-1, 1]
             double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
 
-            slowmode.update(gamepad2.dpad_down);
+            slowmode.update(gamepad2.dpad_left);
             if (slowmode.value() == true) {
                 denominator *= 2;
             }
@@ -143,7 +143,7 @@ public class Drive {
             // but only if at least one is out of the range [-1, 1]
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
-            slowmode.update(gamepad2.dpad_down);
+            slowmode.update(gamepad2.dpad_left);
             if (slowmode.value() == true) {
                 denominator *= 2;
             }
