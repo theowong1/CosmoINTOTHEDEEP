@@ -1,6 +1,8 @@
 package teleop.transport;
 
 import static teleop.AllianceStorage.isRed;
+import static teleop.AllianceStorage.isSpec;
+import static teleop.AllianceStorage.useColorSensor;
 
 import android.graphics.Color;
 
@@ -24,7 +26,8 @@ public class TransportFSM {
     public boolean test = false;
     public TouchSensor zeroLimit, outLimit;
 
-    public Toggle intakeToggle, isSpecToggle;
+    public Toggle intakeToggle, isSpecToggle, pickyToggle, colorSensorToggle, redToggle, manualMode;
+    //TODO: MNUL MODE N TEST EVERYTHING
     private ServoImplEx rot, bucketPitch, specClaw, specRot, specArm, flicker;
     private CRServoImplEx outWheel;
     //    private ServoImplEx flap;
@@ -184,7 +187,7 @@ public class TransportFSM {
 
     public static double rotIntake = .9;
     public static double rotPrep = .6;
-    public static double rotHome = .25;
+    public static double rotHome = .225;
     public static double rotOuttake = .25;
 
     public static double bucketPitchHome = 1;
@@ -194,7 +197,7 @@ public class TransportFSM {
     public static double specClawRollIntake = .15;
     public static double specClawRollOuttake = .86;
 
-    public static double specClawOpen = .4;
+    public static double specClawOpen = .45;
     public static double specClawClosed = .15;
     public static double specArmHome = .05;
     public static double specRotPrep = .2;
@@ -249,7 +252,9 @@ public class TransportFSM {
     public static double specRotWait = .2;
     public static double specScoreWait = .85;
     public static double specRetractWait = .65;
-    public static boolean isSpec = true;
+
+    //STATE
+//    public static boolean isSpec = true;
 
     //Get Sample Color
 //    public String getColor() {
@@ -278,6 +283,9 @@ public class TransportFSM {
     //FSMS:
     public enum SampleTransport {
         SAMPLE_HOME,
+        OUTPLUSEXTENDED,
+        DUMPPLUSEXTENDED,
+        INTAKERETRACTOUT,
         INTAKE,
         EXTENDED,
         RETRACTING,
@@ -315,7 +323,30 @@ public class TransportFSM {
         zeroLimit = hardwareMap.get(TouchSensor.class, "zeroLimit");
         outLimit = hardwareMap.get(TouchSensor.class, "outLimit");
         intakeToggle = new Toggle(false);
-        isSpecToggle = new Toggle(true);
+        if (isSpec == 0) {
+            isSpecToggle = new Toggle(true);
+            pickyToggle = new Toggle(false);
+        } else if (isSpec == 1) {
+            isSpecToggle = new Toggle(false);
+            pickyToggle = new Toggle(false);
+        } else if (isSpec == 2) {
+            isSpecToggle = new Toggle(false);
+            pickyToggle = new Toggle(true);
+        }
+
+        if (useColorSensor) {
+            colorSensorToggle = new Toggle(true);
+        } else {
+            colorSensorToggle = new Toggle(false);
+        }
+
+        if (isRed) {
+            redToggle = new Toggle(true);
+        } else {
+            redToggle = new Toggle(false);
+        }
+        manualMode = new Toggle(false);
+
 //        if (isRed) {
 //            isRedToggle = new Toggle(true);
 //        } else {
@@ -396,13 +427,13 @@ public class TransportFSM {
         //INIT LED COLOR: purpleRGB!
     }
 
-    public void setSampleState(int sampleState) {
-        this.sampleState = sampleState;
-    }
-
-    public void setSpecState(int specState) {
-        this.specState = specState;
-    }
+//    public void setSampleState(int sampleState) {
+//        this.sampleState = sampleState;
+//    }
+//
+//    public void setSpecState(int specState) {
+//        this.specState = specState;
+//    }
 
     public void update() {
         validSample = updateColor();
@@ -432,8 +463,6 @@ public class TransportFSM {
         specRot.setPosition(specRotPos);
         flicker.setPosition(flickerPos);
         outWheel.setPower(outWheelPower);
-
-        validSample = updateColor();
 
         //TODO: FSM UPDTE FOR UTO
         switch (sampleTransport) {
@@ -530,10 +559,6 @@ public class TransportFSM {
             case PREP:
                 specArmPos = specArmScore;
                 specRotPos = specClawRollIntake;
-                if (specimenWait.seconds() > specRotWait) {
-                    specimenWait.reset();
-                    specimenTransport = SpecimenTransport.SCORE;
-                }
                 break;
             case SCORE:
                 specRotPos = specClawRollOuttake;
@@ -567,9 +592,12 @@ public class TransportFSM {
 
 
     public void update(Gamepad gamepad1, Gamepad gamepad2) {
-        validSample = updateColor();
         intakeToggle.update(gamepad1.a);
         isSpecToggle.update(gamepad1.back);
+        pickyToggle.update(gamepad1.dpad_up);
+        colorSensorToggle.update(gamepad1.dpad_left);
+        manualMode.update(gamepad2.back);
+
         outPos = out.getCurrentPosition();
         outpid = outController.calculate(outPos, outTarget);
         out.setPower(outpid);
@@ -598,302 +626,348 @@ public class TransportFSM {
         specRot.setPosition(specRotPos);
         flicker.setPosition(flickerPos);
         outWheel.setPower(outWheelPower);
-
-        switch (sampleTransport) {
-            case SAMPLE_HOME:
-                intakePower = dormant;
-                rotPos = rotHome;
-                bucketPitchPos = bucketPitchHome;
+        if (!manualMode.value()) {
+            switch (sampleTransport) {
+                case SAMPLE_HOME:
+                    intakePower = dormant;
+                    rotPos = rotHome;
+                    bucketPitchPos = bucketPitchHome;
 //                bucketYawPos = bucketYawHome;
-                outTarget = outHome;
+                    outTarget = outHome;
 //                flapPos = flapClosedrotHome;
-                extendoTarget = extendoLower;
-                outWheelPower = dormant;
-                if (gamepad1.right_trigger > 0) {
-                    sampleTransport = SampleTransport.EXTENDED;
-                }
-                if ((extendoPos <= extended) && gamepad1.right_bumper && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
-                    sampleWait.reset();
-                    isHighBucket = false;
-                    sampleTransport = SampleTransport.TRANSFER;
-                }
-                if (gamepad1.y && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
-                    sampleWait.reset();
-                    depositObsv = true;
-                    sampleTransport = SampleTransport.EXTENDED;
-                }
-                if (gamepad1.left_bumper && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
-                    sampleWait.reset();
-                    isHighBucket = true;
-                    sampleTransport = SampleTransport.TRANSFER;
-                }
-                break;
-            case EXTENDED:
-                outTarget = outHome;
-                bucketPitchPos = bucketPitchHome;
-                intakePower = maintaining;
-                //chnge lter
-                rotPos = rotPrep;
-                extendoTarget = extendoUpper;
-                outWheelPower = dormant;
-                if (depositObsv && extendoPos >= extended + 300) {
-                    specimenTransport = SpecimenTransport.SPECIMEN_HOME;
-                    sampleWait.reset();
-                    sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
-                }
-                if (gamepad1.left_bumper) {
-                    intakeToggle.value = false;
-                    sampleWait.reset();
-                    isHighBucket = true;
-                    sampleTransport = SampleTransport.RETRACTING;
-                }
-                if (gamepad1.right_bumper) {
-                    intakeToggle.value = false;
-                    sampleWait.reset();
-                    isHighBucket = false;
-                    sampleTransport = SampleTransport.RETRACTING;
-                }
-                if (gamepad1.left_trigger > 0) {
-                    sampleTransport = SampleTransport.SAMPLE_HOME;
-                }
+                    extendoTarget = extendoLower;
+                    outWheelPower = dormant;
+                    if (gamepad1.right_trigger > 0) {
+                        sampleTransport = SampleTransport.EXTENDED;
+                    }
+                    if ((extendoPos <= extended) && gamepad1.right_bumper && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
+                        sampleWait.reset();
+                        isHighBucket = false;
+                        sampleTransport = SampleTransport.TRANSFER;
+                    }
+                    if (gamepad1.y && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
+                        sampleWait.reset();
+                        depositObsv = true;
+                        sampleTransport = SampleTransport.EXTENDED;
+                    }
+                    if (gamepad1.left_bumper && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
+                        sampleWait.reset();
+                        isHighBucket = true;
+                        sampleTransport = SampleTransport.TRANSFER;
+                    }
+                    break;
+                case EXTENDED:
+                    outTarget = outHome;
+                    bucketPitchPos = bucketPitchHome;
+                    intakePower = maintaining;
+                    //chnge lter
+                    rotPos = rotPrep;
+                    extendoTarget = extendoUpper;
+                    outWheelPower = dormant;
+                    if (depositObsv && extendoPos >= extended + 300) {
+                        specimenTransport = SpecimenTransport.SPECIMEN_HOME;
+                        sampleWait.reset();
+                        sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
+                    }
+                    if (gamepad1.left_bumper) {
+                        intakeToggle.value = false;
+                        sampleWait.reset();
+                        isHighBucket = true;
+                        sampleTransport = SampleTransport.RETRACTING;
+                    }
+                    if (gamepad1.right_bumper) {
+                        intakeToggle.value = false;
+                        sampleWait.reset();
+                        isHighBucket = false;
+                        sampleTransport = SampleTransport.RETRACTING;
+                    }
+                    if (gamepad1.left_trigger > 0) {
+                        sampleTransport = SampleTransport.SAMPLE_HOME;
+                    }
 //                if (extendoPos < extended) {
 //                    sampleTransport = SampleTransport.SAMPLE_HOME;
 //                }
-                if (intakeToggle.value() == true) {
-                    sampleTransport = SampleTransport.INTAKE;
-                }
-                if (gamepad1.y && !depositObsv) {
-                    sampleWait.reset();
-                    sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
-                }
-                if (validSample == 0) {
-                    sampleWait.reset();
-                    sampleTransport = SampleTransport.OUTTAKE;
-                }
-                break;
-            case INTAKE:
-                intakePower = intaking;
-                rotPos = rotIntake;
-                outWheelPower = dormant;
-//                flapPos = flapClosedrotIntake;
-                if (intakeToggle.value() == false) {
-                    sampleTransport = SampleTransport.EXTENDED;
-                }
-                if (gamepad1.left_bumper || (validSample == 1 && !isSpec)) {
-                    intakeToggle.value = false;
-                    sampleWait.reset();
-                    isHighBucket = true;
-                    sampleTransport = SampleTransport.RETRACTING;
-                }
-                if (gamepad1.right_bumper || (validSample == 1 && isSpec)) {
-                    intakeToggle.value = false;
-                    sampleWait.reset();
-                    isHighBucket = false;
-                    sampleTransport = SampleTransport.RETRACTING;
-                }
-                if (gamepad1.y) {
-                    sampleWait.reset();
-                    sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
-                }
-                if (validSample == 0) {
-                    sampleWait.reset();
-                    sampleTransport = SampleTransport.OUTTAKE;
-                }
-                break;
-            case EMERGENCY_OUTTAKE:
-                outWheelPower = intaking;
-                intakePower = outtaking;
-                rotPos = rotIntake;
-                if (sampleWait.seconds() > emergencyWit) {
-                    if (depositObsv) {
+                    if (intakeToggle.value() == true) {
+                        sampleTransport = SampleTransport.INTAKE;
+                    }
+                    if (gamepad1.y && !depositObsv) {
                         sampleWait.reset();
-                        sampleTransport = SampleTransport.RETRACTING;
-                    } else {
+                        sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
+                    }
+                    if (validSample == 0) {
+                        sampleWait.reset();
+                        sampleTransport = SampleTransport.OUTTAKE;
+                    }
+                    break;
+                case INTAKE:
+                    intakePower = intaking;
+                    rotPos = rotIntake;
+                    outWheelPower = dormant;
+//                flapPos = flapClosedrotIntake;
+                    if (intakeToggle.value() == false) {
                         sampleTransport = SampleTransport.EXTENDED;
                     }
-                }
-                break;
-            case OUTTAKE:
-                outWheelPower = outtaking;
-                if ((validSample != 0)) {
-                    sampleTransport = SampleTransport.INTAKE;
-                }
-                if (gamepad1.y) {
-                    sampleWait.reset();
-                    sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
-                }
+                    if (gamepad1.left_bumper || (validSample == 1 && isSpec != 0)) {
+                        intakeToggle.value = false;
+                        sampleWait.reset();
+                        isHighBucket = true;
+                        sampleTransport = SampleTransport.RETRACTING;
+                    }
+                    if (gamepad1.right_bumper || (validSample == 1 && isSpec == 0)) {
+                        intakeToggle.value = false;
+                        sampleWait.reset();
+                        isHighBucket = false;
+                        sampleTransport = SampleTransport.RETRACTING;
+                    }
+                    if (gamepad1.y) {
+                        sampleWait.reset();
+                        sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
+                    }
+                    if (validSample == 0) {
+                        sampleWait.reset();
+                        sampleTransport = SampleTransport.OUTTAKE;
+                    }
+                    break;
+                case EMERGENCY_OUTTAKE:
+                    outWheelPower = intaking;
+                    intakePower = outtaking;
+                    rotPos = rotIntake;
+                    if (sampleWait.seconds() > emergencyWit) {
+                        if (depositObsv) {
+                            sampleWait.reset();
+                            sampleTransport = SampleTransport.RETRACTING;
+                        } else {
+                            sampleTransport = SampleTransport.EXTENDED;
+                        }
+                    }
+                    break;
+                case OUTTAKE:
+                    outWheelPower = outtaking;
+                    if ((validSample != 0)) {
+                        sampleTransport = SampleTransport.INTAKE;
+                    }
+                    if (gamepad1.y) {
+                        sampleWait.reset();
+                        sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
+                    }
 //                if ((sampleWait.seconds() >= longlongTransferWait) && (validSample == 0)) {
 //                    sampleWait.reset();
 //                    sampleTransport = SampleTransport.EMERGENCY_OUTTAKE;
 //                }
-                break;
-            case RETRACTING:
-                rotPos = rotHome;
-                outWheelPower = dormant;
+                    break;
+                case RETRACTING:
+                    rotPos = rotHome;
+                    outWheelPower = dormant;
 //                specimenTransport = SpecimenTransport.SPECIMEN_HOME;
-                if (sampleWait.seconds() > emergencyWit) {
-                    intakePower = dormant;
-                    extendoTarget = -5;
-                }
-                if (gamepad1.left_bumper) {
-                    isHighBucket = true;
-                }
-                if (gamepad1.right_bumper || depositObsv) {
-                    isHighBucket = false;
-                }
-                if (gamepad1.right_trigger > 0) {
-                    sampleTransport = SampleTransport.EXTENDED;
-                }
-                if (isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
-                    if (extendoPos < 50 || gamepad1.y) {
-                        sampleWait.reset();
-                        sampleTransport = SampleTransport.TRANSFER;
+                    if (sampleWait.seconds() > emergencyWit) {
+                        intakePower = dormant;
+                        extendoTarget = -5;
                     }
-                } else {
-                    if (extendoPos < 50 || gamepad1.y) {
-//                        sampleWait.reset();
-                        depositObsv = false;
-                        sampleTransport = SampleTransport.SAMPLE_HOME;
+                    if (gamepad1.left_bumper) {
+                        isHighBucket = true;
                     }
-                }
-                break;
-            case TRANSFER:
-                rotPos = rotHome;
-                intakePower = transferring;
-                outWheelPower = intaking;
-                extendoTarget = extendoLower;
-                if (sampleWait.seconds() > shortTransferWait) {
+                    if (gamepad1.right_bumper || depositObsv) {
+                        isHighBucket = false;
+                    }
+                    if (gamepad1.right_trigger > 0) {
+                        sampleTransport = SampleTransport.EXTENDED;
+                    }
                     if (isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
-                        sampleTransport = SampleTransport.HIGH_BUCKET;
-                    } else if (!isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)){
-                        sampleTransport = SampleTransport.DUMP;
+                        if (extendoPos < 50 || gamepad1.y) {
+                            sampleWait.reset();
+                            sampleTransport = SampleTransport.TRANSFER;
+                        }
                     } else {
+                        if (extendoPos < 50 || gamepad1.y) {
+//                        sampleWait.reset();
+                            depositObsv = false;
+                            sampleTransport = SampleTransport.SAMPLE_HOME;
+                        }
+                    }
+                    break;
+                case TRANSFER:
+                    rotPos = rotHome;
+                    intakePower = transferring;
+                    outWheelPower = intaking;
+                    extendoTarget = extendoLower;
+                    if (sampleWait.seconds() > shortTransferWait) {
+                        if (isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
+                            sampleTransport = SampleTransport.HIGH_BUCKET;
+                        } else if (!isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
+                            sampleTransport = SampleTransport.DUMP;
+                        } else {
+                            sampleTransport = SampleTransport.SAMPLE_HOME;
+                        }
+                    }
+                    break;
+                case HIGH_BUCKET:
+                    outWheelPower = dormant;
+                    extendoTarget = extended;
+                    intakePower = dormant;
+                    outTarget = outHighBucket;
+                    bucketPitchPos = bucketPitchPrep;
+                    if (gamepad1.y) {
+                        sampleTransport = SampleTransport.DUMP;
+                    }
+                    if (gamepad1.right_bumper) {
+                        sampleTransport = SampleTransport.EXTENDED;
+                    }
+//                    if (gamepad1.x) {
+//                        sampleTransport = SampleTransport.SAMPLE_HOME;
+//                    }
+                    break;
+                case DUMP:
+                    outWheelPower = dormant;
+                    extendoTarget = extended;
+                    bucketPitchPos = bucketPitchScore;
+//                bucketYawPos = bucketYawSpit;
+                    intakePower = dormant;
+                    if (gamepad1.left_trigger > 0) {
                         sampleTransport = SampleTransport.SAMPLE_HOME;
                     }
-                }
-                break;
-            case HIGH_BUCKET:
-                outWheelPower = dormant;
-                extendoTarget = extended;
-                intakePower = dormant;
-                outTarget = outHighBucket;
-                bucketPitchPos = bucketPitchPrep;
-                if (gamepad1.y) {
-                    sampleTransport = SampleTransport.DUMP;
-                }
-                if (gamepad1.x) {
-                    sampleTransport = SampleTransport.SAMPLE_HOME;
-                }
-                break;
-            case DUMP:
-                outWheelPower = dormant;
-                extendoTarget = extended;
-                bucketPitchPos = bucketPitchScore;
-//                bucketYawPos = bucketYawSpit;
-                intakePower = dormant;
-                if (gamepad1.left_trigger > 0) {
-                    sampleTransport = SampleTransport.SAMPLE_HOME;
-                }
-                if (gamepad1.right_trigger > 0) {
-                    sampleTransport = SampleTransport.EXTENDED;
-                }
-                break;
-            default:
-                sampleTransport = sampleTransport.SAMPLE_HOME;
-        }
+                    if (gamepad1.right_trigger > 0) {
+                        sampleTransport = SampleTransport.EXTENDED;
+                    }
+                    break;
+                default:
+                    sampleTransport = sampleTransport.SAMPLE_HOME;
+            }
 
-        if (gamepad1.dpad_right && sampleTransport != SampleTransport.SAMPLE_HOME) {
+            if (gamepad1.dpad_right && sampleTransport != SampleTransport.SAMPLE_HOME) {
 //            extendoTarget = extendoLower;
-            sampleTransport = SampleTransport.SAMPLE_HOME;
+                sampleTransport = SampleTransport.SAMPLE_HOME;
 //            specimenTransport = SpecimenTransport.SPECIMEN_HOME;
-        }
+            }
 
-        if (zeroLimit.isPressed() || gamepad1.dpad_up) {
-            extendo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            extendo.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
+            if (zeroLimit.isPressed()) {
+                extendo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                extendo.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
 
-        if (outLimit.isPressed()) {
-            out.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
+            if (outLimit.isPressed()) {
+                out.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
 
-        if (gamepad1.dpad_left) {
-            flickerOut(true);
+            if (pickyToggle.value() == true) {
+                isSpec = 2;
+            } else {
+                if (isSpecToggle.value() == true) {
+                    isSpec = 0;
+                } else {
+                    isSpec = 1;
+                }
+            }
+
+            if (colorSensorToggle.value() == true) {
+                validSample = updateColor();
+//            colorSensor.enableLed(true);
+                useColorSensor = true;
+            } else {
+//            colorSensor.enableLed(false);
+                useColorSensor = false;
+            }
+
+            if (redToggle.value() == true) {
+                isRed = true;
+            } else {
+                isRed = false;
+            }
+
+            switch (specimenTransport) {
+                case SPECIMEN_HOME:
+                    specArmPos = specArmHome;
+                    specRotPos = specClawRollIntake;
+                    specClawPos = specClawOpen;
+                    if (gamepad1.b) {
+                        specimenTransport = SpecimenTransport.INTAKE_SPEC;
+                    }
+                    break;
+                case INTAKE_SPEC:
+                    specArmPos = specArmHome;
+                    specRotPos = specClawRollIntake;
+                    specClawPos = specClawClosed;
+                    if (gamepad1.x && (sampleTransport != SampleTransport.HIGH_BUCKET && sampleTransport != SampleTransport.DUMP)) {
+                        specimenWait.reset();
+                        specimenTransport = SpecimenTransport.PREP;
+                    }
+                    break;
+                case PREP:
+                    specArmPos = specArmScore;
+                    specRotPos = specClawRollIntake;
+                    if (specimenWait.seconds() > specRotWait) {
+                        specimenWait.reset();
+                        specimenTransport = SpecimenTransport.SCORE;
+                    }
+                    break;
+                case SCORE:
+                    specRotPos = specClawRollOuttake;
+                    if (gamepad1.b) {
+                        specimenWait.reset();
+                        specimenTransport = SpecimenTransport.EMERGENCY_PREP;
+                    }
+                    if (gamepad1.x) {
+                        specimenWait.reset();
+                        specimenTransport = SpecimenTransport.OPEN;
+                    }
+                    break;
+                case OPEN:
+                    specClawPos = specClawOpen;
+                    if (specimenWait.seconds() > specRetractWait || gamepad1.b) {
+                        specimenWait.reset();
+                        specimenTransport = SpecimenTransport.PREP_HOME;
+                    }
+                    break;
+                case PREP_HOME:
+                    specRotPos = specRotPrep;
+                    specClawPos = specClawClosed;
+                    specArmPos = specArmClear;
+                    if (specimenWait.seconds() > specScoreWait) {
+                        specimenTransport = SpecimenTransport.SPECIMEN_HOME;
+                    }
+                    break;
+                case EMERGENCY_PREP:
+                    specRotPos = specClawRollIntake;
+                    if (specimenWait.seconds() > specScoreWait) {
+                        specimenTransport = SpecimenTransport.INTAKE_SPEC;
+                    }
+                    break;
+            }
+
+            if (gamepad1.dpad_down && specimenTransport != SpecimenTransport.SPECIMEN_HOME) {
+                specimenTransport = SpecimenTransport.SPECIMEN_HOME;
+            }
         } else {
-            flickerOut(false);
-        }
-
-        if (isSpecToggle.value() == true) {
-            isSpec = true;
-        } else {
-            isSpec = false;
-        }
-
-        switch (specimenTransport) {
-            case SPECIMEN_HOME:
-                specArmPos = specArmHome;
-                specRotPos = specClawRollIntake;
-                specClawPos = specClawOpen;
-                if (gamepad1.b) {
-                    specimenTransport = SpecimenTransport.INTAKE_SPEC;
-                }
-                break;
-            case INTAKE_SPEC:
-                specArmPos = specArmHome;
-                specRotPos = specClawRollIntake;
-                specClawPos = specClawClosed;
-                if (gamepad1.x && (sampleTransport != SampleTransport.HIGH_BUCKET && sampleTransport != SampleTransport.DUMP)) {
-                    specimenWait.reset();
-                    specimenTransport = SpecimenTransport.PREP;
-                }
-                break;
-            case PREP:
-                specArmPos = specArmScore;
-                specRotPos = specClawRollIntake;
-                if (specimenWait.seconds() > specRotWait) {
-                    specimenWait.reset();
-                    specimenTransport = SpecimenTransport.SCORE;
-                }
-                break;
-            case SCORE:
-                specRotPos = specClawRollOuttake;
-                if (gamepad1.b) {
-                    specimenWait.reset();
-                    specimenTransport = SpecimenTransport.EMERGENCY_PREP;
-                }
-                if (gamepad1.x) {
-                    specimenWait.reset();
-                    specimenTransport = SpecimenTransport.OPEN;
-                }
-                break;
-            case OPEN:
-                specClawPos = specClawOpen;
-                if (specimenWait.seconds() > specRetractWait || gamepad1.b) {
-                    specimenWait.reset();
-                    specimenTransport = SpecimenTransport.PREP_HOME;
-                }
-                break;
-            case PREP_HOME:
-                specRotPos = specRotPrep;
-                specClawPos = specClawClosed;
-                specArmPos = specArmClear;
-                if (specimenWait.seconds() > specScoreWait) {
-                    specimenTransport = SpecimenTransport.SPECIMEN_HOME;
-                }
-                break;
-            case EMERGENCY_PREP:
-                specRotPos = specClawRollIntake;
-                if (specimenWait.seconds() > specScoreWait) {
-                    specimenTransport = SpecimenTransport.INTAKE_SPEC;
-                }
-                break;
-        }
-
-        if (gamepad1.dpad_down && specimenTransport != SpecimenTransport.SPECIMEN_HOME) {
             specimenTransport = SpecimenTransport.SPECIMEN_HOME;
-        }
+            sampleTransport = SampleTransport.SAMPLE_HOME;
+            if (zeroLimit.isPressed() || gamepad2.a) {
+                extendo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                extendo.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
 
+            if (outLimit.isPressed() || gamepad2.b) {
+                out.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
+
+            if (gamepad2.left_bumper) {
+                outTarget -= 15;
+            }
+
+            if (gamepad2.right_bumper) {
+                outTarget += 15;
+            }
+
+            if (gamepad2.left_trigger > 0) {
+                extendoTarget -= 15;
+            }
+
+            if (gamepad2.right_trigger > 0) {
+                extendoTarget += 15;
+            }
+
+
+        }
         /*
         update():
         if intaking:
@@ -910,30 +984,34 @@ public class TransportFSM {
     }
 
     public int updateColor() {
-        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
-        hue = hsvValues[0];
-        if (Math.abs(hue - yellowSample) < hueError) {
-            if (isSpec) {
-                return 0;
+            Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
+            hue = hsvValues[0];
+            if (useColorSensor) {
+                if (Math.abs(hue - yellowSample) < hueError) {
+                    if (isSpec == 0) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                }
+                if (Math.abs(hue - redSample) < hueError) {
+                    if (isRed && isSpec != 2) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                }
+                if (Math.abs(hue - blueSample) < hueError) {
+                    if (!isRed && isSpec != 2) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                }
+                return 2;
             } else {
-                return 1;
+                return 2;
             }
-        }
-        if (Math.abs(hue - redSample) < hueError) {
-            if (isRed) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-        if (Math.abs(hue - blueSample) < hueError) {
-            if (isRed) {
-                return 0;
-            } else {
-                return 1;
-            }
-        }
-        return 2;
     }
 
 //    public void updateFSM() {
