@@ -595,7 +595,7 @@ public class TransportFSM {
         intakeToggle.update(gamepad1.a);
         isSpecToggle.update(gamepad1.back);
         pickyToggle.update(gamepad1.dpad_up);
-        colorSensorToggle.update(gamepad1.dpad_left);
+        colorSensorToggle.update(gamepad2.dpad_down);
         manualMode.update(gamepad2.back);
 
         outPos = out.getCurrentPosition();

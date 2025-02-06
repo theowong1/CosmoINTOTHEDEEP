@@ -14,6 +14,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+import teleop.transport.EncoderStorage;
+
+import teleop.AllianceStorage;
 
 @Autonomous(name = "Sample Autonomous", group = "Autons")
 public class SampleAuton extends OpMode {
@@ -251,6 +254,7 @@ public class SampleAuton extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
+        EncoderStorage.isAuto = true;
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();

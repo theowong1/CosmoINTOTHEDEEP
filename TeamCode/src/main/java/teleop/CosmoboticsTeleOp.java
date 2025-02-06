@@ -28,7 +28,7 @@ public class CosmoboticsTeleOp extends OpMode {
 
     @Override
     public void init() {
-        EncoderStorage.isAuto = true;
+        EncoderStorage.isAuto = false;
         //TODO: CHNGE TO FLSE N CRETE UTO THT JUST RESETS ENCODERS
         drive = new Drive(hardwareMap);
         transportFSM = new TransportFSM(hardwareMap);

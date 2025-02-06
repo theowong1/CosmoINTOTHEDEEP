@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+import teleop.transport.EncoderStorage;
 import teleop.transport.TransportFSM;
 
 @Autonomous(name = "Pedro Spec Auto", preselectTeleOp = "CosmoboticsTeleOp")
@@ -438,6 +439,7 @@ public class PedroSpecAuto extends OpMode{
 
     @Override
     public void init() {
+        EncoderStorage.isAuto = true;
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
