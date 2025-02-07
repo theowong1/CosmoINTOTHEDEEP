@@ -7,8 +7,8 @@ import teleop.AllianceStorage;
 import teleop.transport.AutoStorage;
 import teleop.transport.TransportFSM;
 
-@Autonomous(name = "BlueNoAutoSampleTele", preselectTeleOp = "CosmoboticsTeleOp")
-public class BlueNoAutoSampleTele extends OpMode {
+@Autonomous(name = "RedNoAutoPickyTele", preselectTeleOp = "CosmoboticsTeleOp")
+public class RedNoAutoPickyTele extends OpMode {
 
     private TransportFSM transport;
 
@@ -21,8 +21,8 @@ public class BlueNoAutoSampleTele extends OpMode {
     @Override
     public void init() {
         AutoStorage.isAuto = true;
-        AllianceStorage.isRed = false;
-        AllianceStorage.teleMode = 1;
+        AllianceStorage.isRed = true;
+        AllianceStorage.teleMode = 2;
         AllianceStorage.useColorSensor = true;
 
         transport = new TransportFSM(hardwareMap);

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import teleop.drive.Drive;
-import teleop.transport.EncoderStorage;
+import teleop.transport.AutoStorage;
 import teleop.transport.TransportFSM;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class CosmoboticsTeleOp extends OpMode {
 
     @Override
     public void init() {
-        EncoderStorage.isAuto = true;
+        AutoStorage.isAuto = false;
         //TODO: CHNGE TO FLSE N CRETE UTO THT JUST RESETS ENCODERS
         drive = new Drive(hardwareMap);
         transportFSM = new TransportFSM(hardwareMap);

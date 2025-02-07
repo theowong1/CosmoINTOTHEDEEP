@@ -3,8 +3,8 @@ package pedroPathing.autons;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-@Autonomous(name = "BlueSpecAutoSpecTele", preselectTeleOp = "CosmoboticsTeleOp")
-public class BlueSpecAutoSpecTele extends OpMode {
+@Autonomous(name = "BlueSpecAutoPickyTele", preselectTeleOp = "CosmoboticsTeleOp")
+public class BlueSpecAutoPickyTele extends OpMode {
 
     private BaseSpecAuto base;
 
@@ -16,7 +16,7 @@ public class BlueSpecAutoSpecTele extends OpMode {
     @Override
     public void init() {
         base = new BaseSpecAuto(hardwareMap);
-        base.setAllianceConstants(false, 1, true);
+        base.setAllianceConstants(false, 2, true);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package teleop.transport;
 
 import static teleop.AllianceStorage.isRed;
-import static teleop.AllianceStorage.isSpec;
+import static teleop.AllianceStorage.teleMode;
 import static teleop.AllianceStorage.useColorSensor;
 
 import android.graphics.Color;
@@ -19,7 +19,6 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import teleop.transport.EncoderStorage;
 import teleop.utils.Toggle;
 
 public class TransportFSM {
@@ -298,7 +297,7 @@ public class TransportFSM {
 
     }
 
-    public SampleTransport sampleTransport = SampleTransport.SAMPLE_HOME;
+    public SampleTransport sampleTransport;
 
     public enum SpecimenTransport {
         SPECIMEN_HOME,
@@ -323,13 +322,13 @@ public class TransportFSM {
         zeroLimit = hardwareMap.get(TouchSensor.class, "zeroLimit");
         outLimit = hardwareMap.get(TouchSensor.class, "outLimit");
         intakeToggle = new Toggle(false);
-        if (isSpec == 0) {
+        if (teleMode == 0) {
             isSpecToggle = new Toggle(true);
             pickyToggle = new Toggle(false);
-        } else if (isSpec == 1) {
+        } else if (teleMode == 1) {
             isSpecToggle = new Toggle(false);
             pickyToggle = new Toggle(false);
-        } else if (isSpec == 2) {
+        } else if (teleMode == 2) {
             isSpecToggle = new Toggle(false);
             pickyToggle = new Toggle(true);
         }
@@ -363,7 +362,7 @@ public class TransportFSM {
         extendoController = new PIDController(extendop, extendoi, extendod);
         extendo = hardwareMap.get(DcMotorEx.class, "extendo");
         extendoController.setPID(extendop, extendoi, extendod);
-        if (EncoderStorage.isAuto) {
+        if (AutoStorage.isAuto) {
             extendo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             extendo.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             extendoPos = extendo.getCurrentPosition();
@@ -373,7 +372,7 @@ public class TransportFSM {
         out = hardwareMap.get(DcMotorEx.class, "out");
         out.setDirection(DcMotorSimple.Direction.REVERSE);
         outController.setPID(outp, outi, outd);
-        if (EncoderStorage.isAuto) {
+        if (AutoStorage.isAuto) {
             out.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             outPos = out.getCurrentPosition();
@@ -410,17 +409,31 @@ public class TransportFSM {
         outWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 //        bucketYaw = hardwareMap.get(ServoImplEx.class, "bucketYaw");
 
-        intake.setPower(dormant);
-        outWheel.setPower(dormant);
-//        specClawRoll.setPosition(specClawRollIntake);
-//        specClaw.setPosition(specClawOpen);
-        rot.setPosition(rotHome);
-//        flap.setPosition(flapClosedrotHome);
-        bucketPitch.setPosition(bucketPitchHome);
-        specClaw.setPosition(specClawClosed);
-        specRot.setPosition(specClawRollIntake);
-        specArm.setPosition(specArmHome);
-        flicker.setPosition(flickerRetracted);
+        if (AutoStorage.isAuto) {
+            //TODO: DO YOU WANT TO MOVE IN INIT? DO YOU WANT TO MOVE THE SLIDES?
+            intake.setPower(dormant);
+            outWheel.setPower(dormant);
+            rot.setPosition(rotHome);
+            bucketPitch.setPosition(bucketPitchHome);
+            specClaw.setPosition(specClawClosed);
+            specRot.setPosition(specClawRollIntake);
+            specArm.setPosition(specArmHome);
+            flicker.setPosition(flickerRetracted);
+            specimenTransport = SpecimenTransport.INTAKE_SPEC;
+            sampleTransport = SampleTransport.SAMPLE_HOME;
+        } else {
+            //TODO: DO YOU WANT TO MOVE IN INIT? DO YOU WANT TO MOVE THE SLIDES?
+            intake.setPower(dormant);
+            outWheel.setPower(dormant);
+            rot.setPosition(rotHome);
+            bucketPitch.setPosition(bucketPitchHome);
+            specClaw.setPosition(specClawOpen);
+            specRot.setPosition(specClawRollIntake);
+            specArm.setPosition(specArmHome);
+            flicker.setPosition(flickerRetracted);
+            specimenTransport = SpecimenTransport.SPECIMEN_HOME;
+            sampleTransport = SampleTransport.SAMPLE_HOME;
+        }
 //        bucketYaw.setPosition(bucketYawHome);
         colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         colorSensor.enableLed(true);
@@ -720,13 +733,13 @@ public class TransportFSM {
                     if (intakeToggle.value() == false) {
                         sampleTransport = SampleTransport.EXTENDED;
                     }
-                    if (gamepad1.left_bumper || (validSample == 1 && isSpec != 0)) {
+                    if (gamepad1.left_bumper || (validSample == 1 && teleMode != 0)) {
                         intakeToggle.value = false;
                         sampleWait.reset();
                         isHighBucket = true;
                         sampleTransport = SampleTransport.RETRACTING;
                     }
-                    if (gamepad1.right_bumper || (validSample == 1 && isSpec == 0)) {
+                    if (gamepad1.right_bumper || (validSample == 1 && teleMode == 0)) {
                         intakeToggle.value = false;
                         sampleWait.reset();
                         isHighBucket = false;
@@ -864,12 +877,12 @@ public class TransportFSM {
             }
 
             if (pickyToggle.value() == true) {
-                isSpec = 2;
+                teleMode = 2;
             } else {
                 if (isSpecToggle.value() == true) {
-                    isSpec = 0;
+                    teleMode = 0;
                 } else {
-                    isSpec = 1;
+                    teleMode = 1;
                 }
             }
 
@@ -1002,21 +1015,21 @@ public class TransportFSM {
             hue = hsvValues[0];
             if (useColorSensor) {
                 if (Math.abs(hue - yellowSample) < hueError) {
-                    if (isSpec == 0) {
+                    if (teleMode == 0) {
                         return 0;
                     } else {
                         return 1;
                     }
                 }
                 if (Math.abs(hue - redSample) < hueError) {
-                    if (isRed && isSpec != 2) {
+                    if (isRed && teleMode != 2) {
                         return 1;
                     } else {
                         return 0;
                     }
                 }
                 if (Math.abs(hue - blueSample) < hueError) {
-                    if (!isRed && isSpec != 2) {
+                    if (!isRed && teleMode != 2) {
                         return 1;
                     } else {
                         return 0;

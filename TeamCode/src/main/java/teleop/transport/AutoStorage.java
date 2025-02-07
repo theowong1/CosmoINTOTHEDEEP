@@ -1,6 +1,6 @@
 package teleop.transport;
 
-public class EncoderStorage {
+public class AutoStorage {
 
     public static boolean isAuto = true;
 }

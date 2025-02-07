@@ -4,7 +4,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
 import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.BezierLine;
-import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
@@ -14,9 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
-import teleop.transport.EncoderStorage;
-
-import teleop.AllianceStorage;
+import teleop.transport.AutoStorage;
 
 @Autonomous(name = "Sample Autonomous", preselectTeleOp = "CosmoboticsTeleOp")
 public class SampleAuton extends OpMode {
@@ -190,7 +187,7 @@ public class SampleAuton extends OpMode {
 
     @Override
     public void init() {
-        EncoderStorage.isAuto = true;
+        AutoStorage.isAuto = true;
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();

@@ -10,81 +10,85 @@ import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
-import teleop.transport.EncoderStorage;
+import teleop.AllianceStorage;
+import teleop.transport.AutoStorage;
 import teleop.transport.TransportFSM;
 
-@Autonomous(name = "Pedro Spec Auto", preselectTeleOp = "CosmoboticsTeleOp")
-public class PedroSpecAuto extends OpMode{
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
-    private TransportFSM transport;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-    private Follower follower;
+//@Autonomous(name = "Pedro Spec Auto", preselectTeleOp = "CosmoboticsTeleOp")
+public class BaseSpecAuto {
 
-    private Timer pathTimer, actionTimer, opmodeTimer;
+    public TransportFSM transport;
 
-    private int pathState;
+    public Follower follower;
 
-    private final double heading = 0;
+    public Timer pathTimer, actionTimer, opmodeTimer;
 
-    private final double scoreX = 39;
+    public int pathState;
 
-    private final double scoreY = 71;
+    public static final double heading = 0;
 
-    private final double scoreYInc = .75;
+    public static final double scoreX = 39;
+
+    public static final double scoreY = 71;
+
+    public static final double scoreYInc = .75;
 
 //    private final double sampleX = 22;
 
-    private final double sampleX = 25;
-    private final Point startPoint = new Point(9, 48, Point.CARTESIAN);
+    public static final double sampleX = 25;
+    public static final Point startPoint = new Point(9, 48, Point.CARTESIAN);
 
-    private final Point spec1scorePoint = new Point(scoreX, scoreY, Point.CARTESIAN);
+    public static final Point spec1scorePoint = new Point(scoreX, scoreY, Point.CARTESIAN);
 
-    private final Point sample1_1EndPoint = new Point(32.7, 36.4, Point.CARTESIAN);
+    public static final Point sample1_1EndPoint = new Point(32.7, 36.4, Point.CARTESIAN);
 
-    private final Point sample1_1Control = new Point(24.7,68.8, Point.CARTESIAN);
+    public static final Point sample1_1Control = new Point(24.7,68.8, Point.CARTESIAN);
 
-    private final Point sample1_2EndPoint = new Point(61.2,29, Point.CARTESIAN);
+    public static final Point sample1_2EndPoint = new Point(61.2,29, Point.CARTESIAN);
 
-    private final Point sample1_2Control = new Point(58,38, Point.CARTESIAN);
+    public static final Point sample1_2Control = new Point(58,38, Point.CARTESIAN);
 
-    private final Point sample1_3EndPoint = new Point(sampleX,27, Point.CARTESIAN);
+    public static final Point sample1_3EndPoint = new Point(sampleX,27, Point.CARTESIAN);
 
-    private final Point sample2_1EndPoint = new Point(59,18.9,Point.CARTESIAN);
+    public static final Point sample2_1EndPoint = new Point(59,18.9,Point.CARTESIAN);
 
-    private final Point sample2_2EndPoint = new Point(sampleX,19, Point.CARTESIAN);
+    public static final Point sample2_2EndPoint = new Point(sampleX,19, Point.CARTESIAN);
 
-    private final Point sample3_1EndPoint = new Point(58.9,9,Point.CARTESIAN);
+    public static final Point sample3_1EndPoint = new Point(58.9,9,Point.CARTESIAN);
 
-    private final Point sample3_2EndPoint = new Point(sampleX,9, Point.CARTESIAN);
+    public static final Point sample3_2EndPoint = new Point(sampleX,9, Point.CARTESIAN);
 
-    private final Point specPickupPoint = new Point(9.5,33,Point.CARTESIAN);
+    public static final Point specPickupPoint = new Point(9.5,33,Point.CARTESIAN);
 
-    private final Point spec2Control = new Point(22.9,32.7,Point.CARTESIAN);
+    public static final Point spec2Control = new Point(22.9,32.7,Point.CARTESIAN);
 
-    private final Point spec2ScorePoint = new Point(scoreX,scoreY + scoreYInc,Point.CARTESIAN);
+    public static final Point spec2ScorePoint = new Point(scoreX,scoreY + scoreYInc,Point.CARTESIAN);
 
-    private final Point spec3Control = new Point(15.3,27.1,Point.CARTESIAN);
+    public static final Point spec3Control = new Point(15.3,27.1,Point.CARTESIAN);
 
-    private final Point spec3ScorePoint = new Point(scoreX, scoreY + 2 * scoreYInc, Point.CARTESIAN);
+    public static final Point spec3ScorePoint = new Point(scoreX, scoreY + 2 * scoreYInc, Point.CARTESIAN);
 
-    private final Point spec4Control = new Point(21,30,Point.CARTESIAN);
+    public static final Point spec4Control = new Point(21,30,Point.CARTESIAN);
 
-    private final Point spec4ScorePoint = new Point(scoreX, scoreY + 3 * scoreYInc, Point.CARTESIAN);
+    public static final Point spec4ScorePoint = new Point(scoreX, scoreY + 3 * scoreYInc, Point.CARTESIAN);
 
-    private final Point spec5Control = new Point(16.1,27.1,Point.CARTESIAN);
+    public static final Point spec5Control = new Point(16.1,27.1,Point.CARTESIAN);
 
-    private final Point spec5ScorePoint = new Point(scoreX, scoreY + 4 * scoreYInc, Point.CARTESIAN);
+    public static final Point spec5ScorePoint = new Point(scoreX, scoreY + 4 * scoreYInc, Point.CARTESIAN);
 
-    private final Point parkPoint = new Point(17,32.5,Point.CARTESIAN);
+    public static final Point parkPoint = new Point(17,32.5,Point.CARTESIAN);
 
-    private Path park;
+    public static Path park;
 
-    private PathChain moveFirstSample, moveSecondSample, moveThirdSample, scoreSpec1, pickupSpec2, scoreSpec2, pickupSpec3, scoreSpec3, pickupSpec4, scoreSpec4, pickupSpec5, scoreSpec5, moveFirstSample1, moveFirstSample2, moveFirstSample3, moveSecondSample1, moveSecondSample2, moveThirdSample1, moveThirdSample2;
+    public static PathChain moveFirstSample, moveSecondSample, moveThirdSample, scoreSpec1, pickupSpec2, scoreSpec2, pickupSpec3, scoreSpec3, pickupSpec4, scoreSpec4, pickupSpec5, scoreSpec5, moveFirstSample1, moveFirstSample2, moveFirstSample3, moveSecondSample1, moveSecondSample2, moveThirdSample1, moveThirdSample2;
 
     public void buildPaths() {
 
@@ -161,8 +165,6 @@ public class PedroSpecAuto extends OpMode{
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(.25)
                 .build();
-
-        //TODO: CHIN INTO PICKUP SPEC 2
 
         pickupSpec2 = follower.pathBuilder()
                 .addPath(new BezierCurve(sample3_2EndPoint,spec2Control,specPickupPoint))
@@ -259,45 +261,77 @@ public class PedroSpecAuto extends OpMode{
             case 3:
                 if(!follower.isBusy()) {
                     follower.followPath(moveThirdSample,true);
-                    setPathState(8);
+                    setPathState(4);
                 }
                 break;
-//            case 4:
-//                if(!follower.isBusy()) {
-//                    follower.followPath(moveSecondSample1,true);
-//                    setPathState(5);
-//                }
-//                break;
-//            case 5:
-//                if(!follower.isBusy()) {
-//                    follower.followPath(moveSecondSample2,true);
-//                    setPathState(6);
-//                }
-//                break;
-//            case 6:
-//                if(!follower.isBusy()) {
-//                    follower.followPath(moveThirdSample1,true);
-//                    setPathState(7);
-//                }
-//                break;
-//            case 7:
-//                if(!follower.isBusy()) {
-//                    follower.followPath(moveThirdSample2,true);
-//                    setPathState(8);
-//                }
-//                break;
-            case 8:
+            case 4:
                 if(!follower.isBusy()) {
                     follower.followPath(pickupSpec2,true);
-                    setPathState(9);
+                    setPathState(5);
                 }
                 break;
-            case 9:
+            case 5:
                 if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime - 1) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
                 }
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 1.75) {
                     follower.followPath(scoreSpec2, true);
+                    setPathState(6);
+                }
+                break;
+            case 6:
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.SCORE;
+                } else if (pathTimer.getElapsedTimeSeconds() >= prepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP;
+                }
+
+                if(!follower.isBusy()) {
+                    follower.followPath(pickupSpec3, true);
+                    setPathState(7);
+                }
+                break;
+            case 7:
+                if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
+                }
+
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
+                    follower.followPath(scoreSpec3, true);
+                    setPathState(8);
+                }
+                break;
+            case 8:
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.SCORE;
+                } else if (pathTimer.getElapsedTimeSeconds() >= prepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP;
+                }
+
+                if(!follower.isBusy()) {
+                    follower.followPath(pickupSpec4, true);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
+                }
+
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
+                    follower.followPath(scoreSpec4, true);
                     setPathState(10);
                 }
                 break;
@@ -309,7 +343,7 @@ public class PedroSpecAuto extends OpMode{
                 }
 
                 if(!follower.isBusy()) {
-                    follower.followPath(pickupSpec3, true);
+                    follower.followPath(pickupSpec5, true);
                     setPathState(11);
                 }
                 break;
@@ -325,67 +359,11 @@ public class PedroSpecAuto extends OpMode{
                 }
 
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
-                    follower.followPath(scoreSpec3, true);
+                    follower.followPath(scoreSpec5, true);
                     setPathState(12);
                 }
                 break;
             case 12:
-                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.SCORE;
-                } else if (pathTimer.getElapsedTimeSeconds() >= prepTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP;
-                }
-
-                if(!follower.isBusy()) {
-                    follower.followPath(pickupSpec4, true);
-                    setPathState(13);
-                }
-                break;
-            case 13:
-                if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
-                }
-
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
-                    follower.followPath(scoreSpec4, true);
-                    setPathState(14);
-                }
-                break;
-            case 14:
-                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.SCORE;
-                } else if (pathTimer.getElapsedTimeSeconds() >= prepTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP;
-                }
-
-                if(!follower.isBusy()) {
-                    follower.followPath(pickupSpec5, true);
-                    setPathState(15);
-                }
-                break;
-            case 15:
-                if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
-                }
-
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
-                    follower.followPath(scoreSpec5, true);
-                    setPathState(16);
-                }
-                break;
-            case 16:
                 if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
                 } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
@@ -398,10 +376,10 @@ public class PedroSpecAuto extends OpMode{
 
                 if(!follower.isBusy()) {
                     follower.followPath(park, true);
-                    setPathState(17);
+                    setPathState(13);
                 }
                 break;
-            case 17:
+            case 13:
                 if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
                 } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
@@ -422,8 +400,27 @@ public class PedroSpecAuto extends OpMode{
         pathTimer.resetTimer();
     }
 
-    @Override
-    public void loop() {
+    public void setAllianceConstants(boolean allianceRed, int telemode, boolean colorSensor) {
+        AutoStorage.isAuto = true;
+        AllianceStorage.isRed = allianceRed;
+        AllianceStorage.teleMode = telemode;
+        AllianceStorage.useColorSensor = colorSensor;
+    }
+
+    public BaseSpecAuto(HardwareMap hardwareMap) {
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
+
+        Constants.setConstants(FConstants.class, LConstants.class);
+        follower = new Follower(hardwareMap);
+        follower.setStartingPose(new Pose(startPoint.getX(), startPoint.getY(), heading));
+        buildPaths();
+
+        transport = new TransportFSM(hardwareMap);
+    }
+
+    public void update(Telemetry telemetry) {
         follower.update();
         transport.update();
         autonomousPathUpdate();
@@ -437,32 +434,50 @@ public class PedroSpecAuto extends OpMode{
         telemetry.update();
     }
 
-    @Override
-    public void init() {
-        EncoderStorage.isAuto = true;
-        pathTimer = new Timer();
-        opmodeTimer = new Timer();
-        opmodeTimer.resetTimer();
-
-        Constants.setConstants(FConstants.class, LConstants.class);
-        follower = new Follower(hardwareMap);
-        follower.setStartingPose(new Pose(startPoint.getX(), startPoint.getY(), heading));
-        buildPaths();
-
-        transport = new TransportFSM(hardwareMap);
-        transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
-    }
-
-    @Override
-    public void init_loop() {}
-
-    @Override
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
     }
 
-    @Override
-    public void stop() {
-    }
+//    @Override
+//    public void loop() {
+//        follower.update();
+//        transport.update();
+//        autonomousPathUpdate();
+//
+//        telemetry.addData("path state", pathState);
+//        telemetry.addData("x", follower.getPose().getX());
+//        telemetry.addData("y", follower.getPose().getY());
+//        telemetry.addData("heading", follower.getPose().getHeading());
+//        telemetry.addData("specClw", transport.specClawPos);
+//        telemetry.addData("trnsportstte", transport.specimenTransport);
+//        telemetry.update();
+//    }
+//
+//    @Override
+//    public void init() {
+//        pathTimer = new Timer();
+//        opmodeTimer = new Timer();
+//        opmodeTimer.resetTimer();
+//
+//        Constants.setConstants(FConstants.class, LConstants.class);
+//        follower = new Follower(hardwareMap);
+//        follower.setStartingPose(new Pose(startPoint.getX(), startPoint.getY(), heading));
+//        buildPaths();
+//
+//        transport = new TransportFSM(hardwareMap);
+//    }
+//
+//    @Override
+//    public void init_loop() {}
+//
+//    @Override
+//    public void start() {
+//        opmodeTimer.resetTimer();
+//        setPathState(0);
+//    }
+//
+//    @Override
+//    public void stop() {
+//    }
 }
