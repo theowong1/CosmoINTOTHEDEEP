@@ -185,9 +185,9 @@ public class TransportFSM {
     public static double bucketYawHome = 0.15;
     public static double bucketYawSpit = .5;
 
-    public static double rotIntake = .9;
-    public static double rotPrep = .6;
-    public static double rotHome = .225;
+    public static double rotIntake = .85;
+    public static double rotPrep = .57;
+    public static double rotHome = .18;
     public static double rotOuttake = .25;
 
     public static double bucketPitchHome = 1;
@@ -197,8 +197,8 @@ public class TransportFSM {
     public static double specClawRollIntake = .15;
     public static double specClawRollOuttake = .86;
 
-    public static double specClawOpen = .45;
-    public static double specClawClosed = .15;
+    public static double specClawOpen = .4;
+    public static double specClawClosed = 0;
     public static double specArmHome = .05;
     public static double specRotPrep = .2;
     public static double specArmScore = .53;
@@ -245,7 +245,7 @@ public class TransportFSM {
     //Wait Values:
     public static double shortshortTransferWait = .5;
     public static double longlongTransferWait = 1.75;
-    public static double shortTransferWait = .25;
+    public static double shortTransferWait = .4;
     public static double longTransferWait = .5;
     public static double emergencyWit = .75;
     public static double dumpWait = .75;
@@ -481,6 +481,19 @@ public class TransportFSM {
                 bucketPitchPos = bucketPitchHome;
                 intakePower = maintaining;
                 //chnge lter
+                rotPos = rotPrep;
+                extendoTarget = extendoUpper;
+                outWheelPower = dormant;
+                break;
+            case INTAKERETRACTOUT:
+                break;
+            case OUTPLUSEXTENDED:
+                outWheelPower = dormant;
+                extendoTarget = extended;
+                intakePower = dormant;
+                outTarget = outHighBucket;
+                bucketPitchPos = bucketPitchPrep;
+                intakePower = maintaining;
                 rotPos = rotPrep;
                 extendoTarget = extendoUpper;
                 outWheelPower = dormant;
@@ -735,6 +748,7 @@ public class TransportFSM {
                     if (sampleWait.seconds() > emergencyWit) {
                         if (depositObsv) {
                             sampleWait.reset();
+                            depositObsv = false;
                             sampleTransport = SampleTransport.RETRACTING;
                         } else {
                             sampleTransport = SampleTransport.EXTENDED;
@@ -773,12 +787,12 @@ public class TransportFSM {
                         sampleTransport = SampleTransport.EXTENDED;
                     }
                     if (isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
-                        if (extendoPos < 50 || gamepad1.y) {
+                        if (extendoPos <= 50 || gamepad1.y) {
                             sampleWait.reset();
                             sampleTransport = SampleTransport.TRANSFER;
                         }
                     } else {
-                        if (extendoPos < 50 || gamepad1.y) {
+                        if (extendoPos <= 50 || gamepad1.y) {
 //                        sampleWait.reset();
                             depositObsv = false;
                             sampleTransport = SampleTransport.SAMPLE_HOME;
@@ -789,7 +803,7 @@ public class TransportFSM {
                     rotPos = rotHome;
                     intakePower = transferring;
                     outWheelPower = intaking;
-                    extendoTarget = extendoLower;
+                    extendoTarget = extendoLower + 20;
                     if (sampleWait.seconds() > shortTransferWait) {
                         if (isHighBucket && (specimenTransport == SpecimenTransport.SPECIMEN_HOME || specimenTransport == SpecimenTransport.INTAKE_SPEC)) {
                             sampleTransport = SampleTransport.HIGH_BUCKET;

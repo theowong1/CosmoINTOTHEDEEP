@@ -31,15 +31,15 @@ public class PedroSpecAuto extends OpMode{
 
     private final double heading = 0;
 
-    private final double scoreX = 37;
+    private final double scoreX = 39;
 
-    private final double scoreY = 68;
+    private final double scoreY = 71;
 
     private final double scoreYInc = .75;
 
 //    private final double sampleX = 22;
 
-    private final double sampleX = 36.5;
+    private final double sampleX = 25;
     private final Point startPoint = new Point(9, 48, Point.CARTESIAN);
 
     private final Point spec1scorePoint = new Point(scoreX, scoreY, Point.CARTESIAN);
@@ -52,7 +52,7 @@ public class PedroSpecAuto extends OpMode{
 
     private final Point sample1_2Control = new Point(58,38, Point.CARTESIAN);
 
-    private final Point sample1_3EndPoint = new Point(sampleX,29.2, Point.CARTESIAN);
+    private final Point sample1_3EndPoint = new Point(sampleX,27, Point.CARTESIAN);
 
     private final Point sample2_1EndPoint = new Point(59,18.9,Point.CARTESIAN);
 
@@ -62,7 +62,7 @@ public class PedroSpecAuto extends OpMode{
 
     private final Point sample3_2EndPoint = new Point(sampleX,9, Point.CARTESIAN);
 
-    private final Point specPickupPoint = new Point(9,33,Point.CARTESIAN);
+    private final Point specPickupPoint = new Point(9.5,33,Point.CARTESIAN);
 
     private final Point spec2Control = new Point(22.9,32.7,Point.CARTESIAN);
 
@@ -91,7 +91,7 @@ public class PedroSpecAuto extends OpMode{
         scoreSpec1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPoint, spec1scorePoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.2)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         moveFirstSample = follower.pathBuilder()
@@ -167,49 +167,49 @@ public class PedroSpecAuto extends OpMode{
         pickupSpec2 = follower.pathBuilder()
                 .addPath(new BezierCurve(sample3_2EndPoint,spec2Control,specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.5)
+                .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec2 = follower.pathBuilder()
                 .addPath(new BezierLine(specPickupPoint, spec2ScorePoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.2)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         pickupSpec3 = follower.pathBuilder()
                 .addPath(new BezierCurve(spec2ScorePoint, spec3Control, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.5)
+                .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec3 = follower.pathBuilder()
                 .addPath(new BezierLine(specPickupPoint, spec3ScorePoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.2)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         pickupSpec4 = follower.pathBuilder()
                 .addPath(new BezierCurve(spec3ScorePoint, spec4Control, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.5)
+                .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec4 = follower.pathBuilder()
                 .addPath(new BezierLine(specPickupPoint, spec4ScorePoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.2)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         pickupSpec5 = follower.pathBuilder()
                 .addPath(new BezierCurve(spec4ScorePoint, spec5Control, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.5)
+                .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec5 = follower.pathBuilder()
                 .addPath(new BezierLine(specPickupPoint, spec5ScorePoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.2)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         park = new Path(new BezierLine(spec5ScorePoint, parkPoint));
@@ -293,10 +293,10 @@ public class PedroSpecAuto extends OpMode{
                 }
                 break;
             case 9:
-                if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime - 1.25) {
+                if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime - 1) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
                 }
-                if(!follower.isBusy()) {
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= 1.75) {
                     follower.followPath(scoreSpec2, true);
                     setPathState(10);
                 }
