@@ -32,6 +32,8 @@ public class SampleAuton extends OpMode {
 
     private double sample3Heading = Math.toRadians(60);
 
+    private double sample4Heading = Math.toRadians(-60);
+
     private double parkHeading = Math.toRadians(-90);
 
     private final Point startPoint = new Point(9.000, 105.000, Point.CARTESIAN);
@@ -46,11 +48,15 @@ public class SampleAuton extends OpMode {
 
     private final Point sample3Point = new Point(31.021, 118.149, Point.CARTESIAN);
 
+    private final Point sample4Point = new Point(64.389, 100.000, Point.CARTESIAN);
+
+    private final Point sample4Control = new Point(63.514, 119.504, Point.CARTESIAN);
+
     private final Point parkPoint = new Point(67.979, 96.128, Point.CARTESIAN);
 
     private final Point parkControl = new Point(76.596, 118.532, Point.CARTESIAN);
 
-    private PathChain scorePreload, pickupSample1, pickupSample2, pickupSample3, scorePickup1, scorePickup2, scorePickup3, park;
+    private PathChain scorePreload, pickupSample1, pickupSample2, pickupSample3, pickupSample4, scorePickup1, scorePickup2, scorePickup3, scorePickup4, park;
 
     public void buildPaths() {
 
@@ -87,6 +93,16 @@ public class SampleAuton extends OpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(new BezierLine(sample3Point, scorePoint))
                 .setLinearHeadingInterpolation(sample3Heading, scoreHeading)
+                .build();
+
+        pickupSample4 = follower.pathBuilder()
+                .addPath(new BezierCurve(scorePoint, sample4Control, sample4Point))
+                .setLinearHeadingInterpolation(scoreHeading, sample4Heading)
+                .build();
+
+        scorePickup4 = follower.pathBuilder()
+                .addPath(new BezierCurve(sample4Point, sample4Control, scorePoint))
+                .setLinearHeadingInterpolation(sample4Heading, scoreHeading)
                 .build();
 
         park = follower.pathBuilder()
@@ -151,11 +167,27 @@ public class SampleAuton extends OpMode {
 
                 if(!follower.isBusy()) {
 
-                    follower.followPath(park,true);
+                    follower.followPath(pickupSample4, true);
                     setPathState(8);
                 }
                 break;
             case 8:
+
+                if(!follower.isBusy()) {
+
+                    follower.followPath(scorePickup4, true);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+
+                if(!follower.isBusy()) {
+
+                    follower.followPath(park,true);
+                    setPathState(10);
+                }
+                break;
+            case 10:
 
                 if(!follower.isBusy()) {
 
