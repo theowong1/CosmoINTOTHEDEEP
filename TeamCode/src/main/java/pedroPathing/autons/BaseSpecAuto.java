@@ -41,6 +41,12 @@ public class BaseSpecAuto {
 
     public static final double scoreYInc = .75;
 
+    public static final double pickupXControl1 = 12;
+
+    public static final double pickupXControl2 = 36;
+
+    public static final double scoreXControl = 24;
+
 //    private final double sampleX = 22;
 
     public static final double sampleX = 25;
@@ -68,21 +74,35 @@ public class BaseSpecAuto {
 
     public static final Point specPickupPoint = new Point(9.5,33,Point.CARTESIAN);
 
-    public static final Point spec2Control = new Point(22.9,32.7,Point.CARTESIAN);
+    public static final Point spec2PickupControl = new Point(22.9,32.7,Point.CARTESIAN);
 
     public static final Point spec2ScorePoint = new Point(scoreX,scoreY + scoreYInc,Point.CARTESIAN);
 
-    public static final Point spec3Control = new Point(15.3,27.1,Point.CARTESIAN);
+    public static final Point spec2ScoreControl = new Point(scoreXControl,spec2ScorePoint.getY(),Point.CARTESIAN);
+
+    public static final Point spec3PickupControl1 = new Point(pickupXControl1,spec2ScorePoint.getY(),Point.CARTESIAN);
+
+    public static final Point spec3PickupControl2 = new Point(pickupXControl2,specPickupPoint.getY(),Point.CARTESIAN);
 
     public static final Point spec3ScorePoint = new Point(scoreX, scoreY + 2 * scoreYInc, Point.CARTESIAN);
 
-    public static final Point spec4Control = new Point(21,30,Point.CARTESIAN);
+    public static final Point spec3ScoreControl = new Point(scoreXControl,spec3ScorePoint.getY(),Point.CARTESIAN);
+
+    public static final Point spec4PickupControl1 = new Point(pickupXControl1,spec3ScorePoint.getY(),Point.CARTESIAN);
+
+    public static final Point spec4PickupControl2 = new Point(pickupXControl2,specPickupPoint.getY(),Point.CARTESIAN);
 
     public static final Point spec4ScorePoint = new Point(scoreX, scoreY + 3 * scoreYInc, Point.CARTESIAN);
 
-    public static final Point spec5Control = new Point(16.1,27.1,Point.CARTESIAN);
+    public static final Point spec4ScoreControl = new Point(scoreXControl,spec4ScorePoint.getY(),Point.CARTESIAN);
+
+    public static final Point spec5PickupControl1 = new Point(pickupXControl1,spec4ScorePoint.getY(),Point.CARTESIAN);
+
+    public static final Point spec5PickupControl2 = new Point(pickupXControl2,specPickupPoint.getY(),Point.CARTESIAN);
 
     public static final Point spec5ScorePoint = new Point(scoreX, scoreY + 4 * scoreYInc, Point.CARTESIAN);
+
+    public static final Point spec5ScoreControl = new Point(scoreXControl,spec5ScorePoint.getY(),Point.CARTESIAN);
 
     public static final Point parkPoint = new Point(17,32.5,Point.CARTESIAN);
 
@@ -167,49 +187,49 @@ public class BaseSpecAuto {
                 .build();
 
         pickupSpec2 = follower.pathBuilder()
-                .addPath(new BezierCurve(sample3_2EndPoint,spec2Control,specPickupPoint))
+                .addPath(new BezierCurve(sample3_2EndPoint,spec2PickupControl,specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec2 = follower.pathBuilder()
-                .addPath(new BezierLine(specPickupPoint, spec2ScorePoint))
+                .addPath(new BezierCurve(specPickupPoint, spec2ScoreControl,spec2ScorePoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(.25)
                 .build();
 
         pickupSpec3 = follower.pathBuilder()
-                .addPath(new BezierCurve(spec2ScorePoint, spec3Control, specPickupPoint))
+                .addPath(new BezierCurve(spec2ScorePoint, spec3PickupControl1, spec3PickupControl2, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec3 = follower.pathBuilder()
-                .addPath(new BezierLine(specPickupPoint, spec3ScorePoint))
+                .addPath(new BezierCurve(specPickupPoint, spec3ScoreControl, spec3ScorePoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(.25)
                 .build();
 
         pickupSpec4 = follower.pathBuilder()
-                .addPath(new BezierCurve(spec3ScorePoint, spec4Control, specPickupPoint))
+                .addPath(new BezierCurve(spec3ScorePoint, spec4PickupControl1, spec4PickupControl2, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec4 = follower.pathBuilder()
-                .addPath(new BezierLine(specPickupPoint, spec4ScorePoint))
+                .addPath(new BezierCurve(specPickupPoint, spec4ScoreControl, spec4ScorePoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(.25)
                 .build();
 
         pickupSpec5 = follower.pathBuilder()
-                .addPath(new BezierCurve(spec4ScorePoint, spec5Control, specPickupPoint))
+                .addPath(new BezierCurve(spec4ScorePoint, spec5PickupControl1, spec5PickupControl2, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec5 = follower.pathBuilder()
-                .addPath(new BezierLine(specPickupPoint, spec5ScorePoint))
+                .addPath(new BezierCurve(specPickupPoint, spec5ScoreControl, spec5ScorePoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(.25)
                 .build();
