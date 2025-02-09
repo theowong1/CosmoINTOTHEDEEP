@@ -120,20 +120,20 @@ public class PIDFTransport extends OpMode {
 //        frontLeft.setPower(frontLeftPower);
 //        backLeft.setPower(backLeftPower);
 //        frontRight.setPower(frontRightPower);
-//        backRight.setPower(backRightPower);
-        bucketPitch.setPosition(bucketPos);
-        rot.setPosition(rotPos);
-        intake.setPower(intakePower);
-        specArm.setPosition(specArmPos);
-        specClaw.setPosition(specClawPos);
-        specRot.setPosition(specRotPos);
+////        backRight.setPower(backRightPower);
+//        bucketPitch.setPosition(bucketPos);
+//        rot.setPosition(rotPos);
+//        intake.setPower(intakePower);
+//        specArm.setPosition(specArmPos);
+//        specClaw.setPosition(specClawPos);
+//        specRot.setPosition(specRotPos);
         flicker.setPosition(flickerPos);
-        outWheel.setPower(outWheelPower);
+//        outWheel.setPower(outWheelPower);
 
-        outController.setPID(outp, outi, outd);
-        int outPos = out.getCurrentPosition();
-        double outpid = outController.calculate(outPos, outTarget);
-        out.setPower(outpid);
+//        outController.setPID(outp, outi, outd);
+//        int outPos = out.getCurrentPosition();
+//        double outpid = outController.calculate(outPos, outTarget);
+//        out.setPower(outpid);
 //
 //        extendoController.setPID(extendop, extendoi, extendod);
 //        int extendoPos = extendo.getCurrentPosition();
@@ -147,7 +147,7 @@ public class PIDFTransport extends OpMode {
 
 //        telemetry.addData("Extendo Pos:", extendoPos);
 //        telemetry.addData("Extendo Target:", extendoTarget);
-        telemetry.addData("Out Pos:", outPos);
+//        telemetry.addData("Out Pos:", outPos);
         telemetry.addData("Out Target:", outTarget);
         telemetry.update();
     }

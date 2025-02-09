@@ -25,7 +25,7 @@ public class TransportFSM {
     public boolean test = false;
     public TouchSensor zeroLimit, outLimit;
 
-    public Toggle intakeToggle, isSpecToggle, pickyToggle, colorSensorToggle, redToggle, manualMode;
+    public Toggle intakeToggle, isSpecToggle, pickyToggle, colorSensorToggle, redToggle, manualMode, flickerToggle;
     //TODO: MNUL MODE N TEST EVERYTHING
     private ServoImplEx rot, bucketPitch, specClaw, specRot, specArm, flicker;
     private CRServoImplEx outWheel;
@@ -184,20 +184,20 @@ public class TransportFSM {
     public static double bucketYawHome = 0.15;
     public static double bucketYawSpit = .5;
 
-    public static double rotIntake = .85;
-    public static double rotPrep = .57;
+    public static double rotIntake = .84;
+    public static double rotPrep = .52;
     public static double rotHome = .18;
     public static double rotOuttake = .25;
 
-    public static double bucketPitchHome = 1;
+    public static double bucketPitchHome = .09;
     public static double bucketPitchPrep = .35;
-    public static double bucketPitchScore = 0;
+    public static double bucketPitchScore = .65;
 
     public static double specClawRollIntake = .15;
     public static double specClawRollOuttake = .86;
 
-    public static double specClawOpen = .4;
-    public static double specClawClosed = 0;
+    public static double specClawOpen = 0;
+    public static double specClawClosed = .5;
     public static double specArmHome = .05;
     public static double specRotPrep = .2;
     public static double specArmScore = .53;
@@ -216,7 +216,7 @@ public class TransportFSM {
     //    public final int dumpTrigger = 600;
     public static int outLowBucket = 600;
     //    public final int lowFlipTrigger = 300;
-    public static int outHighBucket = 2200;
+    public static int outHighBucket = 2250;
     //    public final int highFlipTrigger = 2300;
 //    public final int armHome = 0;
 //    public final int armLowBar = 700;
@@ -293,7 +293,8 @@ public class TransportFSM {
         TRANSFER,
         PREP_BUCKET,
         HIGH_BUCKET,
-        DUMP
+        DUMP,
+        RETRACTING_ROT
 
     }
 
@@ -321,6 +322,7 @@ public class TransportFSM {
     public TransportFSM(HardwareMap hardwareMap) {
         zeroLimit = hardwareMap.get(TouchSensor.class, "zeroLimit");
         outLimit = hardwareMap.get(TouchSensor.class, "outLimit");
+        flickerToggle = new Toggle(false);
         intakeToggle = new Toggle(false);
         if (teleMode == 0) {
             isSpecToggle = new Toggle(true);
@@ -427,7 +429,7 @@ public class TransportFSM {
             outWheel.setPower(dormant);
             rot.setPosition(rotHome);
             bucketPitch.setPosition(bucketPitchHome);
-            specClaw.setPosition(specClawOpen);
+            specClaw.setPosition(specClawClosed);
             specRot.setPosition(specClawRollIntake);
             specArm.setPosition(specArmHome);
             flicker.setPosition(flickerRetracted);
@@ -452,7 +454,7 @@ public class TransportFSM {
         validSample = updateColor();
         outPos = out.getCurrentPosition();
         outpid = outController.calculate(outPos, outTarget);
-        out.setPower(outpid);
+        out.setPower(outpid * .75);
 
         extendoPos = extendo.getCurrentPosition();
         extendopid = extendoController.calculate(extendoPos, extendoTarget);
@@ -499,6 +501,10 @@ public class TransportFSM {
                 outWheelPower = dormant;
                 break;
             case INTAKERETRACTOUT:
+                rotPos = rotIntake;
+                intakePower = intaking;
+                bucketPitchPos = bucketPitchHome;
+                outTarget = outHome;
                 break;
             case OUTPLUSEXTENDED:
                 outWheelPower = dormant;
@@ -532,11 +538,12 @@ public class TransportFSM {
             case RETRACTING:
                 rotPos = rotHome;
                 outWheelPower = dormant;
-//                specimenTransport = SpecimenTransport.SPECIMEN_HOME;
-                if (sampleWait.seconds() > emergencyWit) {
-                    intakePower = dormant;
-                    extendoTarget = -5;
-                }
+                intakePower = dormant;
+                extendoTarget = -5;
+                break;
+            case RETRACTING_ROT:
+                rotPos = rotHome;
+                outWheelPower = dormant;
                 break;
             case TRANSFER:
                 rotPos = rotHome;
@@ -556,6 +563,9 @@ public class TransportFSM {
                 extendoTarget = extended;
                 bucketPitchPos = bucketPitchScore;
 //                bucketYawPos = bucketYawSpit;
+                break;
+            case DUMPPLUSEXTENDED:
+                bucketPitchPos = bucketPitchScore;
                 break;
             default:
                 sampleTransport = sampleTransport.SAMPLE_HOME;
@@ -623,6 +633,7 @@ public class TransportFSM {
         pickyToggle.update(gamepad1.dpad_up);
         colorSensorToggle.update(gamepad2.dpad_down);
         manualMode.update(gamepad2.back);
+        flickerToggle.update(gamepad2.dpad_right);
 
         outPos = out.getCurrentPosition();
         outpid = outController.calculate(outPos, outTarget);
@@ -886,6 +897,12 @@ public class TransportFSM {
                 }
             }
 
+            if (flickerToggle.value() == true) {
+                flickerPos = flickerOut;
+            } else {
+                flickerPos = flickerRetracted;
+            }
+
             if (colorSensorToggle.value() == true) {
                 validSample = updateColor();
 //            colorSensor.enableLed(true);
@@ -946,9 +963,9 @@ public class TransportFSM {
                     }
                     break;
                 case PREP_HOME:
-                    specRotPos = specRotPrep;
-                    specClawPos = specClawClosed;
-                    specArmPos = specArmClear;
+                    specRotPos = specClawRollIntake;
+                    specClawPos = specClawOpen;
+                    specArmPos = specArmHome;
                     if (specimenWait.seconds() > specScoreWait) {
                         specimenTransport = SpecimenTransport.SPECIMEN_HOME;
                     }

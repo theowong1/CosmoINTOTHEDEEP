@@ -34,7 +34,6 @@ public class BlueNoAutoSpecTele extends OpMode {
 
     @Override
     public void start() {
-        stop();
     }
 
     @Override

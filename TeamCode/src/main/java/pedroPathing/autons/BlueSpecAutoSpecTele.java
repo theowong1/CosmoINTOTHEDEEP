@@ -16,7 +16,7 @@ public class BlueSpecAutoSpecTele extends OpMode {
     @Override
     public void init() {
         base = new BaseSpecAuto(hardwareMap);
-        base.setAllianceConstants(false, 1, true);
+        base.setAllianceConstants(false, 0, true);
     }
 
     @Override
