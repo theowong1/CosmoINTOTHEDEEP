@@ -41,13 +41,7 @@ public class BaseSpecAuto {
 
     public static final double scoreYInc = .75;
 
-    public static final double pickupXControl1 = 12;
-
-    public static final double pickupXControl2 = 36;
-
     public static final double scoreXControl = 24;
-
-//    private final double sampleX = 22;
 
     public static final double sampleX = 25;
     public static final Point startPoint = new Point(9, 48, Point.CARTESIAN);
@@ -80,6 +74,8 @@ public class BaseSpecAuto {
 
     public static final Point spec2ScoreControl = new Point(scoreXControl,spec2ScorePoint.getY(),Point.CARTESIAN);
 
+    private final Point spec3PickupControl = new Point(15.3,27.1,Point.CARTESIAN);
+
     public static final Point specScoreReturnPoint = new Point(scoreXControl,specPickupPoint.getY(),Point.CARTESIAN);
 
     public static final Path pickupSpec = new Path(new BezierLine(specScoreReturnPoint, specPickupPoint));
@@ -88,6 +84,8 @@ public class BaseSpecAuto {
 
     public static final Point spec3ScoreControl = new Point(scoreXControl,spec3ScorePoint.getY(),Point.CARTESIAN);
 
+    private final Point spec4PickupControl = new Point(21,30,Point.CARTESIAN);
+
     public static final Point spec4ScorePoint = new Point(scoreX, scoreY + 3 * scoreYInc, Point.CARTESIAN);
 
     public static final Point spec4ScoreControl = new Point(scoreXControl,spec4ScorePoint.getY(),Point.CARTESIAN);
@@ -95,6 +93,8 @@ public class BaseSpecAuto {
     public static final Point spec5ScorePoint = new Point(scoreX, scoreY + 4 * scoreYInc, Point.CARTESIAN);
 
     public static final Point spec5ScoreControl = new Point(scoreXControl,spec5ScorePoint.getY(),Point.CARTESIAN);
+
+    private final Point spec5PickupControl = new Point(16.1,27.1,Point.CARTESIAN);
 
     public static final Point parkPoint = new Point(17,32.5,Point.CARTESIAN);
 
@@ -195,10 +195,8 @@ public class BaseSpecAuto {
         pickupSpec.setConstantHeadingInterpolation(heading);
 
         pickupSpec3 = follower.pathBuilder()
-                .addPath(new BezierCurve(spec2ScorePoint, spec2ScoreControl, specScoreReturnPoint))
+                .addPath(new BezierCurve(spec2ScorePoint, spec3PickupControl, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
-                .addPath(pickupSpec)
-                .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec3 = follower.pathBuilder()
@@ -208,10 +206,8 @@ public class BaseSpecAuto {
                 .build();
 
         pickupSpec4 = follower.pathBuilder()
-                .addPath(new BezierCurve(spec3ScorePoint, spec3ScoreControl, specScoreReturnPoint))
+                .addPath(new BezierCurve(spec3ScorePoint, spec4PickupControl, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
-                .addPath(pickupSpec)
-                .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec4 = follower.pathBuilder()
@@ -221,10 +217,8 @@ public class BaseSpecAuto {
                 .build();
 
         pickupSpec5 = follower.pathBuilder()
-                .addPath(new BezierCurve(spec4ScorePoint, spec4ScoreControl, specScoreReturnPoint))
+                .addPath(new BezierCurve(spec4ScorePoint, spec5PickupControl, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
-                .addPath(pickupSpec)
-                .setPathEndTimeoutConstraint(1)
                 .build();
 
         scoreSpec5 = follower.pathBuilder()
