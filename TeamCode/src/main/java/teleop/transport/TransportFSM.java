@@ -191,22 +191,23 @@ public class TransportFSM {
 
     public static double bucketPitchHome = .09;
     public static double bucketPitchPrep = .35;
-    public static double bucketPitchScore = .65;
+    public static double bucketPitchScore = .7;
 
-    public static double specClawRollIntake = .15;
-    public static double specClawRollOuttake = .86;
+    public static double specClawRollIntake = .215;
+    public static double specClawRollOuttake = .925;
 
-    public static double specClawOpen = 0;
-    public static double specClawClosed = .5;
+    public static double specClawOpen = .7;
+    public static double specClawClosed = .4;
     public static double specArmHome = .05;
     public static double specRotPrep = .2;
     public static double specArmScore = .53;
     public static double specArmClear = .25;
     //MOTOR POSITIONS
-    public static double flickerRetracted = .6;
-    public static double flickerOut = 0.1;
+    public static double flickerRetracted = .75;
+    public static double flickerOut = .3;
     public static int autoExtendoUpper = 675;
-    public static int extendoUpper = 765;
+    //public static int extendoUpper = 765;
+    public static int extendoUpper = 650;
     public static int extendoLower = 0;
     public static int extended = 115;
     public static int transferTrigger = 0;
@@ -249,8 +250,10 @@ public class TransportFSM {
     public static double emergencyWit = .75;
     public static double dumpWait = .75;
     public static double specRotWait = .2;
-    public static double specScoreWait = .85;
+    public static double specScoreWait = .25;
     public static double specRetractWait = .65;
+
+    public static double specRetrctWit2 = .15;
 
     //STATE
 //    public static boolean isSpec = true;
@@ -307,6 +310,8 @@ public class TransportFSM {
         SCORE,
         OPEN,
         PREP_HOME,
+
+        PREP_HOME_TWO,
         EMERGENCY_PREP
     }
 
@@ -454,7 +459,7 @@ public class TransportFSM {
         validSample = updateColor();
         outPos = out.getCurrentPosition();
         outpid = outController.calculate(outPos, outTarget);
-        out.setPower(outpid * .75);
+        out.setPower(outpid / 2.643);
 
         extendoPos = extendo.getCurrentPosition();
         extendopid = extendoController.calculate(extendoPos, extendoTarget);
@@ -606,6 +611,10 @@ public class TransportFSM {
                 specRotPos = specRotPrep;
                 specClawPos = specClawClosed;
                 specArmPos = specArmClear;
+                break;
+            case PREP_HOME_TWO:
+                specRotPos = specClawRollIntake;
+                specClawPos = specClawClosed;
                 break;
             case EMERGENCY_PREP:
                 specRotPos = specClawRollIntake;
@@ -959,15 +968,23 @@ public class TransportFSM {
                     specClawPos = specClawOpen;
                     if (specimenWait.seconds() > specRetractWait || gamepad1.b) {
                         specimenWait.reset();
-                        specimenTransport = SpecimenTransport.PREP_HOME;
+                        specimenTransport = SpecimenTransport.PREP_HOME_TWO;
                     }
                     break;
                 case PREP_HOME:
                     specRotPos = specClawRollIntake;
-                    specClawPos = specClawOpen;
+                    specClawPos = specClawClosed;
                     specArmPos = specArmHome;
                     if (specimenWait.seconds() > specScoreWait) {
                         specimenTransport = SpecimenTransport.SPECIMEN_HOME;
+                    }
+                    break;
+                case PREP_HOME_TWO:
+                    specRotPos = specClawRollIntake;
+                    specClawPos = specClawClosed;
+                    if (specimenWait.seconds() > specRetrctWit2) {
+                        specimenWait.reset();
+                        specimenTransport = SpecimenTransport.PREP_HOME;
                     }
                     break;
                 case EMERGENCY_PREP:

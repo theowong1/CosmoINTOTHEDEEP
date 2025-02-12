@@ -126,7 +126,7 @@ public class PIDFTransport extends OpMode {
 //        intake.setPower(intakePower);
 //        specArm.setPosition(specArmPos);
 //        specClaw.setPosition(specClawPos);
-//        specRot.setPosition(specRotPos);
+        specRot.setPosition(specRotPos);
         flicker.setPosition(flickerPos);
 //        outWheel.setPower(outWheelPower);
 

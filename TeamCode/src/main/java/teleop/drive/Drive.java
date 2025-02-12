@@ -81,7 +81,7 @@ public class Drive {
             //Field Centric Drive:
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x;
-            double rx = gamepad1.right_stick_x;
+            double rx = gamepad1.right_stick_x / 2;
 //            if (rx == 0){
 //                rx = calcRotBasedOnIdeal(botHeading, targetHeading);
 //            }
@@ -129,7 +129,7 @@ public class Drive {
 //            botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-            double rx = gamepad1.right_stick_x;
+            double rx = ((gamepad1.right_stick_x) * 2 / 3);
 //            if (rx == 0){
 //                rx = calcRotBasedOnIdeal(botHeading, targetHeading);
 //            }

@@ -243,6 +243,7 @@ public class BaseSpecAuto {
     public static double prepTime = .1;
 
     public static double scoreTime = 0;
+    public static double waitPrepTime = .75;
 
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -265,10 +266,12 @@ public class BaseSpecAuto {
                 }
                 break;
             case 2:
-                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME_TWO;
                 } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
                 }
@@ -314,13 +317,15 @@ public class BaseSpecAuto {
             case 7:
                 if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
-                }
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
+            } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+            } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME_TWO;
+            } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
+            }
 
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
                     follower.followPath(scoreSpec3, true);
@@ -342,13 +347,15 @@ public class BaseSpecAuto {
             case 9:
                 if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
-                }
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
+            } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+            } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME_TWO;
+            } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
+            }
 
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
                     follower.followPath(scoreSpec4, true);
@@ -370,13 +377,15 @@ public class BaseSpecAuto {
             case 11:
                 if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
-                }
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
+            } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+            } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME_TWO;
+            } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
+                transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
+            }
 
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeSpecTime + .25) {
                     follower.followPath(scoreSpec5, true);
@@ -384,9 +393,7 @@ public class BaseSpecAuto {
                 }
                 break;
             case 12:
-                if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
-                    transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.SCORE;
                 } else if (pathTimer.getElapsedTimeSeconds() >= prepTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.PREP;
@@ -400,10 +407,12 @@ public class BaseSpecAuto {
                 }
                 break;
             case 13:
-                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait) {
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait) {
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime ) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME_TWO;
                 } else if (pathTimer.getElapsedTimeSeconds() >= scoreTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
                 }
@@ -444,6 +453,7 @@ public class BaseSpecAuto {
         follower.update();
         transport.update();
         autonomousPathUpdate();
+        transport.flickerOut(false);
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());

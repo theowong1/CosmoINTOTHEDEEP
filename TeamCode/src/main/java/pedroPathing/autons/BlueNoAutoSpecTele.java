@@ -7,7 +7,7 @@ import teleop.AllianceStorage;
 import teleop.transport.AutoStorage;
 import teleop.transport.TransportFSM;
 
-@Autonomous(name = "BlueNoSpecTele", preselectTeleOp = "CosmoboticsTeleOp")
+@Autonomous(name = "BlueNoAutoSpecTele", preselectTeleOp = "CosmoboticsTeleOp")
 public class BlueNoAutoSpecTele extends OpMode {
 
     private TransportFSM transport;
