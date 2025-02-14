@@ -206,8 +206,8 @@ public class TransportFSM {
     public static double flickerRetracted = .75;
     public static double flickerOut = .3;
     public static int autoExtendoUpper = 675;
-    //public static int extendoUpper = 765;
-    public static int extendoUpper = 650;
+    public static int extendoUpper = 765;
+//    public static int extendoUpper = 650;
     public static int extendoLower = 0;
     public static int extended = 115;
     public static int transferTrigger = 0;
@@ -250,7 +250,7 @@ public class TransportFSM {
     public static double emergencyWit = .75;
     public static double dumpWait = .75;
     public static double specRotWait = .2;
-    public static double specScoreWait = .25;
+    public static double specScoreWait = .45;
     public static double specRetractWait = .65;
 
     public static double specRetrctWit2 = .15;
