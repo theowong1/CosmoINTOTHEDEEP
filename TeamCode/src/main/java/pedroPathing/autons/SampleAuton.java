@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+import teleop.AllianceStorage;
 import teleop.transport.AutoStorage;
 import teleop.transport.TransportFSM;
 
@@ -30,23 +31,25 @@ public class SampleAuton extends OpMode {
 
     private double startAndSample1Heading = 0;
 
-    private double sample2Heading = Math.toRadians(20);
+    private double sample2Heading = Math.toRadians(23.5);
 
-    private double sample3Heading = Math.toRadians(60);
+    private double sample3Heading = Math.toRadians(90);
 
     private double parkHeading = Math.toRadians(-90);
 
     private final Point startPoint = new Point(9.000, 105.000, Point.CARTESIAN);
 
-    private final Point scorePoint = new Point(14.000, 129.500, Point.CARTESIAN);
+    private final Point scorePoint = new Point(11.000, 128.00, Point.CARTESIAN);
+
+    private final Point scorePreloadPoint = new Point(scorePoint.getX()-2, scorePoint.getY()+2, Point.CARTESIAN);
 
     private final Point preloadControl = new Point(20.681, 106.277, Point.CARTESIAN);
 
-    private final Point sample1Point = new Point(15.894, 121.021, Point.CARTESIAN);
+    private final Point sample1Point = new Point(14, 122.3, Point.CARTESIAN);
 
-    private final Point sample2Point = new Point(21.447, 124.277, Point.CARTESIAN);
+    private final Point sample2Point = new Point(14.5, 122.5, Point.CARTESIAN);
 
-    private final Point sample3Point = new Point(31.021, 118.149, Point.CARTESIAN);
+    private final Point sample3Point = new Point(45, 110.5, Point.CARTESIAN);
 
     private final Point parkPoint = new Point(67.979, 96.128, Point.CARTESIAN);
 
@@ -57,12 +60,12 @@ public class SampleAuton extends OpMode {
     public void buildPaths() {
 
         scorePreload = follower.pathBuilder()
-                .addPath(new BezierCurve(startPoint, preloadControl, scorePoint))
+                .addPath(new BezierCurve(startPoint, preloadControl, scorePreloadPoint))
                 .setLinearHeadingInterpolation(startAndSample1Heading, scoreHeading)
                 .build();
 
         pickupSample1 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePoint, sample1Point))
+                .addPath(new BezierLine(scorePreloadPoint, sample1Point))
                 .setLinearHeadingInterpolation(scoreHeading, startAndSample1Heading)
                 .build();
 
@@ -77,7 +80,7 @@ public class SampleAuton extends OpMode {
                 .build();
 
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePoint, sample1Point))
+                .addPath(new BezierLine(sample2Point, scorePoint))
                 .setLinearHeadingInterpolation(sample2Heading, scoreHeading)
                 .build();
 
@@ -97,119 +100,146 @@ public class SampleAuton extends OpMode {
                 .build();
     }
 
-    public static double dumpWait = 1.75;
-    public static double transferTime = 1;
-    public static double extendTime = .5;
+    public static double retractWait = 1.5;
     public static double rotWait = .75;
-    public static double intakeWait = 2;
+    public static double intakeWait = 3;
+    public static double scoreTimeout = 2.25;
+    public static double transferTimeout = 3;
+    public static double scorePos = 2000;
+
+    public static double sample3Wait = 1.25;
+
+    public static double sample1Wait = 0.5;
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                transport.sampleTransport = TransportFSM.SampleTransport.OUTPLUSEXTENDED;
+                transport.flickerOut(false);
+                transport.sampleTransport = TransportFSM.SampleTransport.HIGH_BUCKET;
                 follower.followPath(scorePreload, true);
                 setPathState(1);
                 break;
             case 1:
-                if (pathTimer.getElapsedTimeSeconds() >= dumpWait) {
+                if (pathTimer.getElapsedTimeSeconds() >= scoreTimeout - .75) {
                     transport.sampleTransport = TransportFSM.SampleTransport.DUMPPLUSEXTENDED;
                 }
 
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= dumpWait + rotWait) {
+                if ((!follower.isBusy() && transport.outPos >= scorePos) && pathTimer.getElapsedTimeSeconds() >= scoreTimeout) {
                     follower.followPath(pickupSample1, true);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if (pathTimer.getElapsedTimeSeconds() >= rotWait) {
+                if(pathTimer.getElapsedTimeSeconds() > sample1Wait) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.OUTPLUSEXTENDED;
+                }
+                if (!follower.isBusy()) {
                     transport.sampleTransport = TransportFSM.SampleTransport.INTAKERETRACTOUT;
                 }
 
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeWait) {
+                if((!follower.isBusy() && transport.updateColor() == 1) || pathTimer.getElapsedTimeSeconds() >= intakeWait) {
                     follower.followPath(scorePickup1,true);
                     setPathState(3);
                 }
                 break;
             case 3:
-                if (transport.outPos >= 2000) {
-                    transport.sampleTransport = TransportFSM.SampleTransport.DUMPPLUSEXTENDED;
-                } else if (pathTimer.getElapsedTimeSeconds() >= extendTime + transferTime + TransportFSM.emergencyWit) {
-                    transport.sampleTransport = TransportFSM.SampleTransport.OUTPLUSEXTENDED;
-                } else if (pathTimer.getElapsedTimeSeconds() >= transferTime + TransportFSM.emergencyWit) {
+                if (transport.extendoPos <= 100 || pathTimer.getElapsedTimeSeconds() >= transferTimeout) {
                     transport.sampleTransport = TransportFSM.SampleTransport.TRANSFER;
+                    setPathState(9);
                 } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.emergencyWit){
                     transport.sampleTransport = TransportFSM.SampleTransport.RETRACTING;
                 } else {
                     transport.sampleTransport = TransportFSM.SampleTransport.RETRACTING_ROT;
                 }
+                break;
+            case 9:
+                if (pathTimer.getElapsedTimeSeconds() >= scoreTimeout - .75) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.DUMPPLUSEXTENDED;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.shortTransferWait) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.HIGH_BUCKET;
+                }
 
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= extendTime + transferTime + dumpWait + TransportFSM.emergencyWit) {
-
+                if((!follower.isBusy() && transport.outPos >= scorePos) && pathTimer.getElapsedTimeSeconds() >= scoreTimeout) {
                     follower.followPath(pickupSample2,true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if (pathTimer.getElapsedTimeSeconds() >= rotWait) {
+                if(pathTimer.getElapsedTimeSeconds() > sample1Wait) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.OUTPLUSEXTENDED;
+                }
+                if (!follower.isBusy()) {
                     transport.sampleTransport = TransportFSM.SampleTransport.INTAKERETRACTOUT;
                 }
 
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeWait) {
-
+                if((!follower.isBusy() && transport.updateColor() == 1) || pathTimer.getElapsedTimeSeconds() >= intakeWait) {
                     follower.followPath(scorePickup2,true);
                     setPathState(5);
                 }
                 break;
             case 5:
-                if (transport.outPos >= 2000) {
-                    transport.sampleTransport = TransportFSM.SampleTransport.DUMPPLUSEXTENDED;
-                } else if (pathTimer.getElapsedTimeSeconds() >= extendTime + transferTime + TransportFSM.emergencyWit) {
-                    transport.sampleTransport = TransportFSM.SampleTransport.OUTPLUSEXTENDED;
-                } else if (pathTimer.getElapsedTimeSeconds() >= transferTime + TransportFSM.emergencyWit) {
+                if (transport.extendoPos <= 100 || pathTimer.getElapsedTimeSeconds() >= transferTimeout) {
                     transport.sampleTransport = TransportFSM.SampleTransport.TRANSFER;
+                    setPathState(10);
                 } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.emergencyWit){
                     transport.sampleTransport = TransportFSM.SampleTransport.RETRACTING;
                 } else {
                     transport.sampleTransport = TransportFSM.SampleTransport.RETRACTING_ROT;
                 }
+                break;
+            case 10:
+                if (pathTimer.getElapsedTimeSeconds() >= scoreTimeout - .75) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.DUMPPLUSEXTENDED;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.shortTransferWait) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.HIGH_BUCKET;
+                }
 
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= extendTime + transferTime + dumpWait + TransportFSM.emergencyWit) {
-
+                if((!follower.isBusy() && transport.outPos >= scorePos) && pathTimer.getElapsedTimeSeconds() >= scoreTimeout) {
                     follower.followPath(pickupSample3,true);
                     setPathState(6);
                 }
                 break;
             case 6:
-                if (pathTimer.getElapsedTimeSeconds() >= rotWait) {
+                if(pathTimer.getElapsedTimeSeconds() > sample3Wait) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.OUTPLUSEXTENDED;
+                }
+                if (!follower.isBusy()) {
                     transport.sampleTransport = TransportFSM.SampleTransport.INTAKERETRACTOUT;
                 }
 
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= intakeWait) {
-
-                    follower.followPath(scorePickup3, true);
+                if((!follower.isBusy() && transport.updateColor() == 1) || pathTimer.getElapsedTimeSeconds() >= intakeWait) {
+                    follower.followPath(scorePickup3,true);
                     setPathState(7);
                 }
                 break;
             case 7:
-                if (transport.outPos >= 2000) {
-                    transport.sampleTransport = TransportFSM.SampleTransport.DUMPPLUSEXTENDED;
-                } else if (pathTimer.getElapsedTimeSeconds() >= extendTime + transferTime + TransportFSM.emergencyWit) {
-                    transport.sampleTransport = TransportFSM.SampleTransport.OUTPLUSEXTENDED;
-                } else if (pathTimer.getElapsedTimeSeconds() >= transferTime + TransportFSM.emergencyWit) {
+                if (transport.extendoPos <= 100 || pathTimer.getElapsedTimeSeconds() >= transferTimeout) {
                     transport.sampleTransport = TransportFSM.SampleTransport.TRANSFER;
+                    setPathState(11);
                 } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.emergencyWit){
                     transport.sampleTransport = TransportFSM.SampleTransport.RETRACTING;
                 } else {
                     transport.sampleTransport = TransportFSM.SampleTransport.RETRACTING_ROT;
                 }
+                break;
+            case 11:
+                if (pathTimer.getElapsedTimeSeconds() >= scoreTimeout - .75) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.DUMPPLUSEXTENDED;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.shortTransferWait) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.HIGH_BUCKET;
+                }
 
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() >= extendTime + transferTime + dumpWait + TransportFSM.emergencyWit) {
-                    transport.sampleTransport = TransportFSM.SampleTransport.SAMPLE_HOME;
+                if((!follower.isBusy() && transport.outPos >= scorePos) && pathTimer.getElapsedTimeSeconds() >= scoreTimeout) {
                     follower.followPath(park,true);
                     setPathState(8);
                 }
                 break;
             case 8:
+                if (pathTimer.getElapsedTimeSeconds() >= retractWait) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.SAMPLE_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= .25){
+                    transport.sampleTransport = TransportFSM.SampleTransport.INTAKERETRACTOUT;
+                }
 
                 if(!follower.isBusy()) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.PREP;
@@ -246,6 +276,7 @@ public class SampleAuton extends OpMode {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
+        AllianceStorage.teleMode = 1;
 
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);

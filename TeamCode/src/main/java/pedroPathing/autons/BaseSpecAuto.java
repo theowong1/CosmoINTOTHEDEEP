@@ -35,38 +35,39 @@ public class BaseSpecAuto {
 
     public static final double heading = 0;
 
-    public static final double scoreX = 39;
+    public static final double scoreX = 38;
 
-    public static final double scoreY = 71;
+    public static final double scoreY = 68;
 
-    public static final double scoreYInc = .75;
+    public static final double scoreYInc = .85;
 
     public static final double scoreXControl = 24;
 
-    public static final double sampleX = 25;
+    public static final double sampleX = 27;
+    public static final double pushX = 57;
     public static final Point startPoint = new Point(9, 48, Point.CARTESIAN);
 
     public static final Point spec1scorePoint = new Point(scoreX, scoreY, Point.CARTESIAN);
 
-    public static final Point sample1_1EndPoint = new Point(32.7, 36.4, Point.CARTESIAN);
+    public static final Point sample1_1EndPoint = new Point(37.5, 37.5, Point.CARTESIAN);
 
     public static final Point sample1_1Control = new Point(24.7,68.8, Point.CARTESIAN);
 
-    public static final Point sample1_2EndPoint = new Point(61.2,29, Point.CARTESIAN);
+    public static final Point sample1_2EndPoint = new Point(pushX,27, Point.CARTESIAN);
 
     public static final Point sample1_2Control = new Point(58,38, Point.CARTESIAN);
 
     public static final Point sample1_3EndPoint = new Point(sampleX,27, Point.CARTESIAN);
 
-    public static final Point sample2_1EndPoint = new Point(59,18.9,Point.CARTESIAN);
+    public static final Point sample2_1EndPoint = new Point(pushX,18.9,Point.CARTESIAN);
 
     public static final Point sample2_2EndPoint = new Point(sampleX,19, Point.CARTESIAN);
 
-    public static final Point sample3_1EndPoint = new Point(58.9,9,Point.CARTESIAN);
+    public static final Point sample3_1EndPoint = new Point(pushX,9,Point.CARTESIAN);
 
     public static final Point sample3_2EndPoint = new Point(sampleX,9, Point.CARTESIAN);
 
-    public static final Point specPickupPoint = new Point(10,33,Point.CARTESIAN);
+    public static final Point specPickupPoint = new Point(8.25,33,Point.CARTESIAN);
 
     public static final Point spec2PickupControl = new Point(22.9,32.7,Point.CARTESIAN);
 
@@ -81,12 +82,13 @@ public class BaseSpecAuto {
     public static final Point spec4ScorePoint = new Point(scoreX, scoreY + 3 * scoreYInc, Point.CARTESIAN);
 
     public static final Point spec5ScorePoint = new Point(scoreX, scoreY + 4 * scoreYInc, Point.CARTESIAN);
+    public static final Point spec6ScorePoint = new Point(scoreX, scoreY + 5 * scoreYInc, Point.CARTESIAN);
 
     public static final Point parkPoint = new Point(17,32.5,Point.CARTESIAN);
 
     public static Path park;
 
-    public static PathChain moveFirstSample, moveSecondSample, moveThirdSample, scoreSpec1, pickupSpec2, scoreSpec2, pickupSpec3, scoreSpec3, pickupSpec4, scoreSpec4, pickupSpec5, scoreSpec5, moveFirstSample1, moveFirstSample2, moveFirstSample3, moveSecondSample1, moveSecondSample2, moveThirdSample1, moveThirdSample2;
+    public static PathChain moveFirstSample, moveSecondSample, moveThirdSample, scoreSpec1, pickupSpec2, scoreSpec2, pickupSpec3, scoreSpec3, pickupSpec4, scoreSpec4, pickupSpec5, scoreSpec5, pickupSpec6, scoreSpec6, moveFirstSample1, moveFirstSample2, moveFirstSample3, moveSecondSample1, moveSecondSample2, moveThirdSample1, moveThirdSample2;
 
     public void buildPaths() {
 
@@ -127,13 +129,13 @@ public class BaseSpecAuto {
         moveFirstSample1 = follower.pathBuilder()
                 .addPath(new BezierCurve(spec1scorePoint, sample1_1Control, sample1_1EndPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.25)
+                .setPathEndTimeoutConstraint(0)
                 .build();
 
         moveFirstSample2 = follower.pathBuilder()
                 .addPath(new BezierCurve(sample1_1EndPoint, sample1_2Control, sample1_2EndPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.25)
+                .setPathEndTimeoutConstraint(0)
                 .build();
 
         moveFirstSample3 = follower.pathBuilder()
@@ -145,7 +147,7 @@ public class BaseSpecAuto {
         moveSecondSample1 = follower.pathBuilder()
                 .addPath(new BezierCurve(sample1_3EndPoint, sample1_2EndPoint, sample2_1EndPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.25)
+                .setPathEndTimeoutConstraint(0)
                 .build();
 
         moveSecondSample2 = follower.pathBuilder()
@@ -157,23 +159,23 @@ public class BaseSpecAuto {
         moveThirdSample1 = follower.pathBuilder()
                 .addPath(new BezierCurve(sample2_2EndPoint,sample2_1EndPoint, sample3_1EndPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.25)
+                .setPathEndTimeoutConstraint(0)
                 .build();
 
         moveThirdSample2 = follower.pathBuilder()
                 .addPath(new BezierLine(sample3_1EndPoint,sample3_2EndPoint))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(.25)
+                .setPathEndTimeoutConstraint(0)
                 .build();
 
         pickupSpec2 = follower.pathBuilder()
-                .addPath(new BezierCurve(sample3_2EndPoint,spec2PickupControl,specPickupPoint))
+                .addPath(new BezierLine(sample3_2EndPoint, new Point(specPickupPoint.getX() - 1, specPickupPoint.getY(), Point.CARTESIAN)))
                 .setConstantHeadingInterpolation(heading)
-                .setPathEndTimeoutConstraint(1)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         scoreSpec2 = follower.pathBuilder()
-                .addPath(new BezierLine(specPickupPoint, spec2ScorePoint))
+                .addPath(new BezierLine(new Point(specPickupPoint.getX() - 1, specPickupPoint.getY(), Point.CARTESIAN), spec2ScorePoint))
                 .setConstantHeadingInterpolation(heading)
                 .setPathEndTimeoutConstraint(.25)
                 .build();
@@ -183,6 +185,7 @@ public class BaseSpecAuto {
         pickupSpec3 = follower.pathBuilder()
                 .addPath(new BezierLine(spec2ScorePoint, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         scoreSpec3 = follower.pathBuilder()
@@ -194,6 +197,7 @@ public class BaseSpecAuto {
         pickupSpec4 = follower.pathBuilder()
                 .addPath(new BezierLine(spec3ScorePoint, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         scoreSpec4 = follower.pathBuilder()
@@ -205,6 +209,7 @@ public class BaseSpecAuto {
         pickupSpec5 = follower.pathBuilder()
                 .addPath(new BezierLine(spec4ScorePoint, specPickupPoint))
                 .setConstantHeadingInterpolation(heading)
+                .setPathEndTimeoutConstraint(.25)
                 .build();
 
         scoreSpec5 = follower.pathBuilder()
@@ -213,18 +218,33 @@ public class BaseSpecAuto {
                 .setPathEndTimeoutConstraint(.25)
                 .build();
 
-        park = new Path(new BezierLine(spec5ScorePoint, parkPoint));
+        pickupSpec6 = follower.pathBuilder()
+                .addPath(new BezierLine(spec5ScorePoint, specPickupPoint))
+                .setConstantHeadingInterpolation(heading)
+                .setPathEndTimeoutConstraint(.25)
+                .build();
+
+        scoreSpec6 = follower.pathBuilder()
+                .addPath(new BezierLine(specPickupPoint, spec6ScorePoint))
+                .setConstantHeadingInterpolation(heading)
+                .setPathEndTimeoutConstraint(.25)
+                .build();
+
+        park = new Path(new BezierLine(spec6ScorePoint, parkPoint));
         park.setConstantHeadingInterpolation(heading);
     }
 
-    public static double intakeSpecTime = .5;
-    public static double startPathTime = .7;
+    public static double intakeSpecTime = 0.05;
+    public static double startPathTime = 0.2;
 
     public static double prepTime = .1;
 
     public static double scoreTime = 0;
-    public static double waitPrepTime = .5;
+    public static double waitPrepTime = .25;
 
+    public static double extendTime = 1;
+    public static double intakeTime = 1;
+    public static double dropTime = 1.25;
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
@@ -233,7 +253,9 @@ public class BaseSpecAuto {
                 setPathState(1);
                 break;
             case 1:
-                transport.sampleTransport = TransportFSM.SampleTransport.SAMPLE_HOME;
+                if (pathTimer.getElapsedTimeSeconds() >= extendTime) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.EXTENDED;
+                }
                 if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.SCORE;
                 } else if (pathTimer.getElapsedTimeSeconds() >= prepTime) {
@@ -242,17 +264,29 @@ public class BaseSpecAuto {
 
                 if(!follower.isBusy()) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
+                    setPathState(18);
+                }
+                break;
+            case 18:
+                if (pathTimer.getElapsedTimeSeconds() >= intakeTime || transport.updateColor() == 1) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.RETRACTING;
                     follower.followPath(moveFirstSample, true);
                     setPathState(2);
                 }
+                else {
+                    transport.sampleTransport = TransportFSM.SampleTransport.INTAKE;
+                }
                 break;
             case 2:
-                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime + dropTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime + dropTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
-                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime) {
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime + dropTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME_TWO;
+                    transport.sampleTransport = TransportFSM.SampleTransport.SAMPLE_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= dropTime) {
+                    transport.sampleTransport = TransportFSM.SampleTransport.TRANSFER;
                 }
 
                 if(!follower.isBusy()) {
@@ -382,6 +416,40 @@ public class BaseSpecAuto {
             case 17:
                 if (pathTimer.getElapsedTimeSeconds() >= startPathTime) {
                     follower.followPath(scoreSpec5, true);
+                    setPathState(19);
+                } else if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;
+                }
+                break;
+            case 19:
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRotWait + prepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.SCORE;
+                } else if (pathTimer.getElapsedTimeSeconds() >= prepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP;
+                }
+
+                if(!follower.isBusy()) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.OPEN;
+                    follower.followPath(pickupSpec6, true);
+                    setPathState(20);
+                }
+                break;
+            case 20:
+                if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specScoreWait + TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.SPECIMEN_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetractWait + TransportFSM.specRetrctWit2 + waitPrepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME;
+                } else if (pathTimer.getElapsedTimeSeconds() >= TransportFSM.specRetrctWit2 + waitPrepTime) {
+                    transport.specimenTransport = TransportFSM.SpecimenTransport.PREP_HOME_TWO;
+                }
+
+                if(!follower.isBusy()) {
+                    setPathState(21);
+                }
+                break;
+            case 21:
+                if (pathTimer.getElapsedTimeSeconds() >= startPathTime) {
+                    follower.followPath(scoreSpec6, true);
                     setPathState(12);
                 } else if (pathTimer.getElapsedTimeSeconds() >= intakeSpecTime) {
                     transport.specimenTransport = TransportFSM.SpecimenTransport.INTAKE_SPEC;

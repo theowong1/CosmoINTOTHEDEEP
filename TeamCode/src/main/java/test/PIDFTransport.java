@@ -97,10 +97,7 @@ public class PIDFTransport extends OpMode {
         extendo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extendo.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        outController = new PIDController(outp, outi, outd);
         out = hardwareMap.get(DcMotorEx.class, "out");
-        out.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         out.setDirection(DcMotorSimple.Direction.REVERSE);
 
         outWheel = hardwareMap.get(CRServoImplEx.class, "outWheel");
@@ -130,6 +127,7 @@ public class PIDFTransport extends OpMode {
         flicker.setPosition(flickerPos);
 //        outWheel.setPower(outWheelPower);
 
+        out.setPower(outTarget);
 //        outController.setPID(outp, outi, outd);
 //        int outPos = out.getCurrentPosition();
 //        double outpid = outController.calculate(outPos, outTarget);
