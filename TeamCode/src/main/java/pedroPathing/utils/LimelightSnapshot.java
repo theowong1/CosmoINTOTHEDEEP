@@ -1,5 +1,6 @@
 package pedroPathing.utils;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
@@ -19,7 +20,7 @@ public class LimelightSnapshot {
     public static double k = 1; //TODO: Tune this value
 
     public LimelightSnapshot(Limelight3A limelight) {
-        tlimelight = hardwareMap.get(Limelight3A.class, "limelight");
+      //  limelight = hardwareMap.get(Limelight3A.class, "limelight");
     }
 
     public boolean getSnapshot() {
@@ -27,7 +28,7 @@ public class LimelightSnapshot {
         LLResult result = limelight.getLatestResult();
         if(result != null && result.isValid()) {
             x = result.getTx();
-            length = result.getLength(result.getTy());
+         //   length = result.getLength(result.getTy());
         }
         return result.isValid();
     }
